@@ -1,0 +1,8 @@
+{
+  "app/punch/page.js -> react-qr-scanner": {
+    "id": "app/punch/page.js -> react-qr-scanner",
+    "files": [
+      "static/chunks/_app-pages-browser_node_modules_react-qr-scanner_dist_react-qr-scanner_umd_js.js"
+    ]
+  }
+}
