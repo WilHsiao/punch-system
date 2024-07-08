@@ -17,7 +17,7 @@ export default function PasswordUnlock({ onUnlock }) {
     };
 
     return (
-        <div>
+        <div className="flex min-h-screen flex-col items-center justify-center p-24">
             <h1>請輸入密碼</h1>
             <form onSubmit={(e) => { e.preventDefault(); checkAccessPassword(); }}>
                 <input

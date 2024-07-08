@@ -8,13 +8,14 @@ import { ref, set } from 'firebase/database';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Navigation from '@/components/navigation';
+import PasswordUnlock from '@/components/page-pw-unlock';
 
 export default function Register() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [name, setName] = useState('');
     const [error, setError] = useState('');
-    // const [accessGranted, setAccessGranted] = useState(false);
+    const [accessGranted, setAccessGranted] = useState(false);
 
     const handleRegister = async (e) => {
         e.preventDefault();
@@ -41,20 +42,20 @@ export default function Register() {
         }
     };
 
-    // if (!accessGranted) {
-    //     return (
-    //         <>
-    //             <Navigation />
-    //             <PasswordUnlock onUnlock={() => setAccessGranted(true)} />
-    //         </>
-    //     );
-    // }
+    if (!accessGranted) {
+        return (
+            <>
+                <Navigation />
+                <PasswordUnlock onUnlock={() => setAccessGranted(true)} />
+            </>
+        );
+    }
 
     return (
         <>
             <Navigation />
             <div className="flex min-h-screen flex-col items-center justify-center p-24">
-                <h1>註冊頁</h1>
+                <h1>新增人員</h1>
                 {error && <p style={{ color: 'red' }}>{error}</p>}
                 <form onSubmit={handleRegister}>
                     <input
