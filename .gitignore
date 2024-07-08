@@ -1,4 +1,36 @@
-
+# Next.js build output
 .next/
+
+# MacOS系統文件
 .DS_Store
+
+# Next.js cache
 .next/cache
+
+# Node.js modules
+node_modules/
+
+# 日誌文件
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+
+# .env環境變量文件
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# 可能的IDE配置文件
+.idea/
+.vscode/
+*.sublime-workspace
+
+# 其他操作系統文件
+Thumbs.db
+
+# 忽略打包輸出的文件夾
+dist/
+build/
