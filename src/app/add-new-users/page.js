@@ -1,7 +1,6 @@
 // src/app/add-new-users
 
 'use client';
-import Link from 'next/link';
 import { useState } from 'react';
 import { auth, database } from '@/config/firebaseConfig';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
@@ -15,10 +14,7 @@ export default function Register() {
     const [password, setPassword] = useState('');
     const [name, setName] = useState('');
     const [error, setError] = useState('');
-    const [accessGranted, setAccessGranted] = useState(false);
-    const [accessPassword, setAccessPassword] = useState('');
-    const [authError, setAuthError] = useState('');
-    const [showPassword, setShowPassword] = useState(false);
+    // const [accessGranted, setAccessGranted] = useState(false);
 
     const handleRegister = async (e) => {
         e.preventDefault();
@@ -45,51 +41,19 @@ export default function Register() {
         }
     };
 
-    const checkAccessPassword = () => {
-        if (accessPassword === '123123123') {
-            setAccessGranted(true);
-            setAuthError('');
-        } else {
-            setAuthError('密碼錯誤');
-        }
-    };
-
-    if (!accessGranted) {
-        return (
-            <>
-            <Navigation />
-            <div>
-                <h1>請輸入密碼</h1>
-                <form onSubmit={(e) => { e.preventDefault(); checkAccessPassword(); }}>
-                    <input
-                        type={showPassword ? 'text' : 'password'}
-                        value={accessPassword}
-                        onChange={(e) => setAccessPassword(e.target.value)}
-                        placeholder="訪問密碼"
-                        style={{ color: 'black' }}
-                    />
-                    <label>
-                        <input
-                            type="checkbox"
-                            checked={showPassword}
-                            onChange={() => setShowPassword(!showPassword)}
-                        />
-                        顯示密碼
-                    </label>
-                    <br />
-                    <button type="submit">[ 提交 ]</button>
-                    {authError && <p style={{ color: 'red' }}>{authError}</p>}
-                </form>
-                <ToastContainer />
-            </div>
-            </>
-        );
-    }
+    // if (!accessGranted) {
+    //     return (
+    //         <>
+    //             <Navigation />
+    //             <PasswordUnlock onUnlock={() => setAccessGranted(true)} />
+    //         </>
+    //     );
+    // }
 
     return (
         <>
             <Navigation />
-            <div>
+            <div className="flex min-h-screen flex-col items-center justify-center p-24">
                 <h1>註冊頁</h1>
                 {error && <p style={{ color: 'red' }}>{error}</p>}
                 <form onSubmit={handleRegister}>
