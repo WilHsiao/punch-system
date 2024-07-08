@@ -99,6 +99,7 @@ export default function Register() {
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="請輸入信箱"
                         style={{ color: 'black' }}
+                        autoComplete="email"
                     />
                     <br /><br />
                     <input
@@ -107,6 +108,7 @@ export default function Register() {
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="請輸入密碼"
                         style={{ color: 'black' }}
+                        autoComplete="current-password"
                     />
                     <br /><br />
                     <input
@@ -115,6 +117,7 @@ export default function Register() {
                         onChange={(e) => setName(e.target.value)}
                         placeholder="請輸入名字"
                         style={{ color: 'black' }}
+                        autoComplete="name"
                     />
                     <br /><br />
                     <button type="submit">[ 創建 ]</button>
