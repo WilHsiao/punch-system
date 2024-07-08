@@ -1,4 +1,4 @@
-# Next.js build output
+
 .next/
 .DS_Store
-/.next/cache
+.next/cache
