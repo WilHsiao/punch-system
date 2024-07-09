@@ -2,21 +2,21 @@
 
 'use client';
 import { useState, useRef, useEffect } from 'react';
-import { set, ref, get, serverTimestamp } from 'firebase/database';
+import { database } from '@/config/firebaseConfig';
+import { set, ref, get, serverTimestamp, query, orderByChild, limitToLast } from 'firebase/database';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import dynamic from 'next/dynamic';
-import { database } from '@/config/firebaseConfig';
 import Navigation from '@/components/navigation';
 
 // 動態加載 QrReader 組件，只在客戶端渲染
 const QrReader = dynamic(() => import('react-qr-scanner'), { ssr: false });
 
 export default function Punch() {
-    const [buttonDisabled, setButtonDisabled] = useState(false);
     const [name, setName] = useState('');
     const [uid, setUid] = useState('');
     const [scanning, setScanning] = useState(true);
+    const [punchType, setPunchType] = useState('');
     const lastScanTime = useRef(Date.now());
     const isProcessing = useRef(false);
 
@@ -29,6 +29,8 @@ export default function Punch() {
 
     const handleScan = async (data) => {
         const now = Date.now();
+
+        // 避免瞬間感應多次打卡
         if (data && now - lastScanTime.current > 1500 && !isProcessing.current) {
             isProcessing.current = true;
             console.log("QR Code detected: ", data.text);
@@ -50,6 +52,14 @@ export default function Punch() {
     };
 
     const handlePunch = async (uid) => {
+        if (punchType === '') {
+            toast.error('請選擇打卡類型！', {
+                autoClose: 2000,
+            });
+            setScanning(true);
+            return;
+        }
+
         try {
             const userRef = ref(database, `users/${uid}`);
             const userSnapshot = await get(userRef);
@@ -57,23 +67,41 @@ export default function Punch() {
                 const userData = userSnapshot.val();
                 setName(userData.name);
 
-                const punchData = { timestamp: serverTimestamp() };
+                // 解決五分鐘內重複打卡
+                const punchesQuery = query(ref(database, `users/${uid}/punches`), orderByChild('timestamp'), limitToLast(1));
+                const punchesSnapshot = await get(punchesQuery);
+                if (punchesSnapshot.exists()) {
+                    const lastPunch = Object.values(punchesSnapshot.val())[0];
+                    const lastPunchTime = new Date(lastPunch.timestamp);
+                    const now = new Date();
+
+                    if ((now - lastPunchTime) < 5 * 60 * 1000) {
+                        toast.error('重複打卡，請稍後再試！', {
+                            autoClose: 2000,
+                        });
+                        setScanning(true);
+                        return;
+                    }
+                }
+
+                const punchData = { timestamp: serverTimestamp(), type: punchType };
                 const punchRef = ref(database, `users/${uid}/punches/${new Date().toISOString().replace(/\W/g, '')}`);
                 await set(punchRef, punchData);
                 console.log("Punch recorded successfully.");
                 toast.success(`${userData.name} 打卡成功！`, {
                     autoClose:2000,
                 });
+
+                // 成功打卡後重新整理頁面
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+
             } else {
                 toast.error('用戶不存在！', {
                     autoClose:2000,
                 });
             }
-
-            setButtonDisabled(false);
-            setTimeout(() => {
-                setScanning(true);
-            }, 2000);
 
         } catch (error) {
             console.error("Error handling punch: ", error);
@@ -81,30 +109,38 @@ export default function Punch() {
                 autoClose:2000,
             });
         } finally {
-            setButtonDisabled(false);
             setTimeout(() => {
                 setScanning(true);
-            }, 2000);
+            }, 1500);
         }
     };
 
     return (
         <>
             <Navigation />
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-                {scanning && (
-                    <div style={{ width: '50%', height: '50%' }}>
-                        <QrReader
-                            delay={300}
-                            onError={handleError}
-                            onScan={handleScan}
-                            style={{ width: '100%', height: '100%' }}
-                        />
-                    </div>
-                )}
+            <div className="flex flex-col items-center justify-center h-1/3 space-y-6 p-24">
+                <div className="flex items-center justify-center space-x-2">
+                    <label htmlFor="punchType" className="mb-2">打卡類型:</label>
+                    <select id="punchType" value={punchType} onChange={(e) => setPunchType(e.target.value)} className="p-2 border border-gray-300">
+                        <option value="">請選擇</option>
+                        <option value="上班">上班</option>
+                        <option value="下班">下班</option>
+                    </select>
+                </div>
+                <div className="flex justify-center items-center">
+                    {scanning && (
+                        <div style={{ width: '100%', height: '100%' }}>
+                            <QrReader
+                                delay={300}
+                                onError={handleError}
+                                onScan={handleScan}
+                                style={{ width: '100%', height: '100%' }}
+                            />
+                        </div>
+                    )}
+                </div>
             </div>
             <ToastContainer />
         </>
     );
 }
-

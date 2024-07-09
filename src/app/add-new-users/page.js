@@ -41,7 +41,7 @@ export default function Register() {
             setError(error.message);
         }
     };
-
+    // 頁面密碼鎖
     if (!accessGranted) {
         return (
             <>
@@ -54,7 +54,7 @@ export default function Register() {
     return (
         <>
             <Navigation />
-            <div className="flex min-h-screen flex-col items-center justify-center p-24">
+            <div className="flex flex-col items-center justify-start h-1/3 p-24">
                 <h1>新增人員</h1>
                 {error && <p style={{ color: 'red' }}>{error}</p>}
                 <form onSubmit={handleRegister}>
