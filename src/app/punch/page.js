@@ -119,6 +119,7 @@ export default function Punch() {
         <>
             <Navigation />
             <div className="flex flex-col items-center justify-center h-1/3 space-y-6 p-24">
+                <h1>管理員登入後才能開啟打卡系統！</h1>
                 <div className="flex items-center justify-center space-x-2">
                     <label htmlFor="punchType" className="mb-2">打卡類型:</label>
                     <select id="punchType" value={punchType} onChange={(e) => setPunchType(e.target.value)} className="p-2 border border-gray-300">

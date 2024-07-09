@@ -53,11 +53,8 @@ export default function Navigation(){
             <Link href="/punch" legacyBehavior>
               <a className="text-lg font-bold">[打卡]</a>
             </Link>
-            <Link href="/add-new-users" legacyBehavior>
-              <a className="text-lg font-bold">[新增使用者]</a>
-            </Link>
             <Link href="/member-system" legacyBehavior>
-              <a className="text-lg font-bold">[會員中心]</a>
+              <a className="text-lg font-bold">[管理員專區]</a>
             </Link>
             {currentUserEmail && (
               <>
