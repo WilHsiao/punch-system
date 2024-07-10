@@ -8,9 +8,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import dynamic from 'next/dynamic';
 import Navigation from '@/components/navigation';
-
-// 動態加載 QrReader 組件，只在客戶端渲染
-const QrReader = dynamic(() => import('react-qr-scanner'), { ssr: false });
+const QrReader = dynamic(() => import('react-qr-scanner'), { ssr: false }); // 動態加載 QrReader 組件，只在客戶端渲染
 
 export default function Punch() {
     const [name, setName] = useState('');
@@ -21,6 +19,11 @@ export default function Punch() {
     const isProcessing = useRef(false);
 
     useEffect (() => {
+        const storedPunchType = localStorage.getItem('punchType'); // 從local端儲存中讀取打卡類型
+        if (storedPunchType) {
+            setPunchType(storedPunchType);
+        }
+
         return () => {
             isProcessing.current = false;
         };
@@ -92,11 +95,6 @@ export default function Punch() {
                     autoClose:2000,
                 });
 
-                // 成功打卡後重新整理頁面
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1000);
-
             } else {
                 toast.error('用戶不存在！', {
                     autoClose:2000,
@@ -115,6 +113,13 @@ export default function Punch() {
         }
     };
 
+    const handlePunchTypeChange = (e) => {
+        const selectedPunchType = e.target.value;
+        setPunchType(selectedPunchType);
+        localStorage.setItem('punchType', selectedPunchType); // 儲存到local端
+        window.location.reload();
+    };
+
     return (
         <>
             <Navigation />
@@ -122,11 +127,30 @@ export default function Punch() {
                 <h1>管理員登入後才能開啟打卡系統！</h1>
                 <div className="flex items-center justify-center space-x-2">
                     <label htmlFor="punchType" className="mb-2">打卡類型:</label>
-                    <select id="punchType" value={punchType} onChange={(e) => setPunchType(e.target.value)} className="p-2 border border-gray-300">
-                        <option value="">請選擇</option>
-                        <option value="上班">上班</option>
-                        <option value="下班">下班</option>
-                    </select>
+                    <div className="p-2 border border-gray-300">
+                      <div>
+                        <input
+                          type="radio"
+                          id="punchTypeStart"
+                          name="punchType"
+                          value="上班"
+                          checked={punchType === "上班"}
+                          onChange={handlePunchTypeChange}
+                        />
+                        <label htmlFor="punchTypeStart" className="ml-2">上班</label>
+                      </div>
+                      <div>
+                        <input
+                          type="radio"
+                          id="punchTypeEnd"
+                          name="punchType"
+                          value="下班"
+                          checked={punchType === "下班"}
+                          onChange={handlePunchTypeChange}
+                        />
+                        <label htmlFor="punchTypeEnd" className="ml-2">下班</label>
+                      </div>
+                    </div>
                 </div>
                 <div className="flex justify-center items-center">
                     {scanning && (
