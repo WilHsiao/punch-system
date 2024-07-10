@@ -36,7 +36,7 @@ export default function Navigation(){
             <a className="text-lg font-bold">首頁</a>
           </Link>
           <div className="flex space-x-4">
-            <Link href="/punch" legacyBehavior>
+            <Link href="/punch-v2" legacyBehavior>
               <a className="text-lg font-bold">[打卡]</a>
             </Link>
             <Link href="/member-system" legacyBehavior>
