@@ -2,8 +2,9 @@
 
 'use client';
 import { useState, useRef, useEffect } from 'react';
-import { database } from '@/config/firebaseConfig';
+import { database, auth } from '@/config/firebaseConfig';
 import { set, ref, get, serverTimestamp, query, orderByChild, limitToLast } from 'firebase/database';
+import { onAuthStateChanged } from 'firebase/auth';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import dynamic from 'next/dynamic';
@@ -18,17 +19,26 @@ export default function Punch() {
     const lastScanTime = useRef(Date.now());
     const isProcessing = useRef(false);
 
-    useEffect (() => {
-        const storedPunchType = localStorage.getItem('punchType'); // 從local端儲存中讀取打卡類型
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            if (user) {
+                toast.info("歡迎使用打卡系統！", { autoClose: 2000 });
+            } else {
+                toast.error('請先登入！', { autoClose: 2000 });
+            }
+        });
+
+        const storedPunchType = localStorage.getItem('punchType'); // 從 localStorage 中讀取打卡類型
         if (storedPunchType) {
             setPunchType(storedPunchType);
         }
 
         return () => {
-            isProcessing.current = false;
-        };
-    }, []);
-
+        // 清理函數
+        isProcessing.current = false;
+        unsubscribe();
+    };
+}, []);
 
     const handleScan = async (data) => {
         const now = Date.now();
@@ -49,16 +59,12 @@ export default function Punch() {
 
     const handleError = (err) => {
         console.error("QR Reader Error: ", err);
-        toast.error(`掃描 QR Code 失敗: ${err}`, {
-            autoClose: 2000,
-        });
+        toast.error(`掃描 QR Code 失敗: ${err}`, { autoClose: 2000 });
     };
 
     const handlePunch = async (uid) => {
         if (punchType === '') {
-            toast.error('請選擇打卡類型！', {
-                autoClose: 2000,
-            });
+            toast.error('請選擇打卡類型！', { autoClose: 2000 });
             setScanning(true);
             return;
         }
@@ -71,7 +77,7 @@ export default function Punch() {
                 setName(userData.name);
 
                 // 解決五分鐘內重複打卡
-                const punchesQuery = query(ref(database, `users/${uid}/punches`), orderByChild('timestamp'), limitToLast(1));
+                const punchesQuery = query(ref(database, `punches/${uid}`), orderByChild('timestamp'), limitToLast(1));
                 const punchesSnapshot = await get(punchesQuery);
                 if (punchesSnapshot.exists()) {
                     const lastPunch = Object.values(punchesSnapshot.val())[0];
@@ -79,33 +85,25 @@ export default function Punch() {
                     const now = new Date();
 
                     if ((now - lastPunchTime) < 5 * 60 * 1000) {
-                        toast.error('重複打卡，請稍後再試！', {
-                            autoClose: 2000,
-                        });
+                        toast.error('重複打卡，請稍後再試！', { autoClose: 2000 });
                         setScanning(true);
                         return;
                     }
                 }
 
                 const punchData = { timestamp: serverTimestamp(), type: punchType };
-                const punchRef = ref(database, `users/${uid}/punches/${new Date().toISOString().replace(/\W/g, '')}`);
+                const punchRef = ref(database, `punches/${uid}/${new Date().toISOString().replace(/\W/g, '')}`);
                 await set(punchRef, punchData);
                 console.log("Punch recorded successfully.");
-                toast.success(`${userData.name} 打卡成功！`, {
-                    autoClose:2000,
-                });
+                toast.success(`${userData.name} 打卡成功！`, { autoClose: 2000 });
 
             } else {
-                toast.error('用戶不存在！', {
-                    autoClose:2000,
-                });
+                toast.error('用戶不存在！', { autoClose: 2000 });
             }
 
         } catch (error) {
             console.error("Error handling punch: ", error);
-            toast.error('打卡過程出現錯誤', {
-                autoClose:2000,
-            });
+            toast.error('打卡過程出現錯誤', { autoClose: 2000 });
         } finally {
             setTimeout(() => {
                 setScanning(true);
@@ -128,28 +126,28 @@ export default function Punch() {
                 <div className="flex items-center justify-center space-x-2">
                     <label htmlFor="punchType" className="mb-2">打卡類型:</label>
                     <div className="p-2 border border-gray-300">
-                      <div>
-                        <input
-                          type="radio"
-                          id="punchTypeStart"
-                          name="punchType"
-                          value="上班"
-                          checked={punchType === "上班"}
-                          onChange={handlePunchTypeChange}
-                        />
-                        <label htmlFor="punchTypeStart" className="ml-2">上班</label>
-                      </div>
-                      <div>
-                        <input
-                          type="radio"
-                          id="punchTypeEnd"
-                          name="punchType"
-                          value="下班"
-                          checked={punchType === "下班"}
-                          onChange={handlePunchTypeChange}
-                        />
-                        <label htmlFor="punchTypeEnd" className="ml-2">下班</label>
-                      </div>
+                        <div>
+                            <input
+                                type="radio"
+                                id="punchTypeStart"
+                                name="punchType"
+                                value="上班"
+                                checked={punchType === "上班"}
+                                onChange={handlePunchTypeChange}
+                            />
+                            <label htmlFor="punchTypeStart" className="ml-2">上班</label>
+                        </div>
+                        <div>
+                            <input
+                                type="radio"
+                                id="punchTypeEnd"
+                                name="punchType"
+                                value="下班"
+                                checked={punchType === "下班"}
+                                onChange={handlePunchTypeChange}
+                            />
+                            <label htmlFor="punchTypeEnd" className="ml-2">下班</label>
+                        </div>
                     </div>
                 </div>
                 <div className="flex justify-center items-center">
