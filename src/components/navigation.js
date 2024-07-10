@@ -2,32 +2,19 @@
 
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { auth, database } from '@/config/firebaseConfig';
+import { auth } from '@/config/firebaseConfig';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { ref, get } from 'firebase/database';
 
 export default function Navigation(){
   const [currentUserEmail, setCurrentUserEmail] = useState('');
-  const [currentUserName, setCurrentUserName] = useState('');
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setCurrentUserEmail(user.email);
-
-        const userRef = ref(database, `users/${user.uid}`);
-        const snapshot = await get(userRef);
-
-        if (snapshot.exists()) {
-          const userData = snapshot.val();
-          setCurrentUserName(userData.name);
-        } else {
-            console.log("No data available");
-        }
       } else {
-            setCurrentUserEmail('');
-            setCurrentUserName('');
-        }
+        setCurrentUserEmail('');
+      }
     });
     return () => unsubscribe();
   }, []);
@@ -36,7 +23,6 @@ export default function Navigation(){
     try {
       await signOut(auth);
       setCurrentUserEmail('');
-      setCurrentUserName('');
     } catch (error) {
       console.error("Sign out error", error);
     }
@@ -58,7 +44,7 @@ export default function Navigation(){
             </Link>
             {currentUserEmail && (
               <>
-                <span className="text-lg font-bold">{currentUserName} 你好！</span>
+                <span className="text-lg font-bold">{currentUserEmail} 你好！</span>
                   <button
                     onClick={handleLogout}
                     className="text-lg font-bold"
