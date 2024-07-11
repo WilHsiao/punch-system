@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { auth } from '@/config/firebaseConfig';
-import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { onAuthStateChanged } from 'firebase/auth';
 
 export default function Navigation(){
   const [currentUserEmail, setCurrentUserEmail] = useState('');
