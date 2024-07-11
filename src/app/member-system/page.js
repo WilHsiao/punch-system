@@ -2,7 +2,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/config/firebaseConfig';
 import { ToastContainer, toast } from 'react-toastify';
@@ -14,17 +14,44 @@ export default function Login() {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [user, setUser] = useState(null);
+    const inactivityTimeoutRef = useRef(null);
+
+    const logoutDueToInactivity = async () => {
+        toast.info('由於長時間未操作，已自動登出。');
+        await handleLogout();
+    };
+
+    const resetInactivityTimeout = () => {
+        if (inactivityTimeoutRef.current) {
+            clearTimeout(inactivityTimeoutRef.current);
+        }
+        inactivityTimeoutRef.current = setTimeout(logoutDueToInactivity, 15 * 60 * 1000); // 15 分鐘
+    };
+
+    const handleUserActivity = () => {
+        resetInactivityTimeout();
+    };
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             if (user) {
                 setUser(user);
+                resetInactivityTimeout();
+                window.addEventListener('mousemove', handleUserActivity);
+                window.addEventListener('keydown', handleUserActivity);
+                window.addEventListener('click', handleUserActivity);
             } else {
                 setUser(null);
             }
         });
 
-        return () => unsubscribe();
+        return () => {
+            unsubscribe();
+            clearTimeout(inactivityTimeoutRef.current);
+            window.removeEventListener('mousemove', handleUserActivity);
+            window.removeEventListener('keydown', handleUserActivity);
+            window.removeEventListener('click', handleUserActivity);
+        };
     }, []);
 
     const handleLogin = async (e) => {
@@ -33,6 +60,7 @@ export default function Login() {
         try {
             await signInWithEmailAndPassword(auth, email, password);
             toast.success('登入成功！');
+            resetInactivityTimeout();
         } catch (error) {
             console.error(error);
             setError('登入失敗，請檢查您的電子郵件和密碼。');
