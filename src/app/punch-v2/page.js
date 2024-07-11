@@ -24,7 +24,7 @@ export default function Punch() {
             if (user) {
                 toast.info("歡迎使用打卡系統！", { autoClose: 2000 });
             } else {
-                toast.error('管理員請登入！', { autoClose: 2000 });
+                toast.error('請前往管理員專區登入！', { autoClose: 2000 });
             }
         });
 
@@ -67,6 +67,14 @@ export default function Punch() {
             toast.error('請選擇打卡類型！', { autoClose: 2000 });
             setScanning(true);
             return;
+        }
+        // 防呆！奇怪時間打卡的重複確認！
+        const currentHour = new Date().getHours();
+        if ((currentHour < 9 && punchType === '下班') || (currentHour >= 20 && punchType === '上班')) {
+            if (!window.confirm('確定要在這個時間打卡嗎？')) {
+                setScanning(true);
+                return;
+            }
         }
 
         try {
