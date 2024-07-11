@@ -1,4 +1,4 @@
-// src/pages/login
+// src/pages/member-system
 
 'use client';
 
@@ -32,12 +32,7 @@ export default function Login() {
         setError('');
         try {
             await signInWithEmailAndPassword(auth, email, password);
-            toast.success('登入成功，即將前往首頁！');
-
-            // 登入成功後跳轉到首頁
-            setTimeout(() => {
-            	window.location.href = '/';
-            },2000);
+            toast.success('登入成功！');
         } catch (error) {
             console.error(error);
             setError('登入失敗，請檢查您的電子郵件和密碼。');
@@ -50,6 +45,8 @@ export default function Login() {
             await signOut(auth);
             toast.success('已成功登出');
             setUser(null);
+            setEmail('');
+            setPassword('');
         } catch (error) {
             console.error(error);
             toast.error('登出失敗，請重試');

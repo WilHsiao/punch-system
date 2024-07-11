@@ -24,7 +24,7 @@ export default function Punch() {
             if (user) {
                 toast.info("歡迎使用打卡系統！", { autoClose: 2000 });
             } else {
-                toast.error('請先登入！', { autoClose: 2000 });
+                toast.error('管理員請登入！', { autoClose: 2000 });
             }
         });
 

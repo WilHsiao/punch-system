@@ -19,38 +19,23 @@ export default function Navigation(){
     return () => unsubscribe();
   }, []);
 
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      setCurrentUserEmail('');
-    } catch (error) {
-      console.error("Sign out error", error);
-    }
-  };
-
   return (
     <>
       <nav className="w-full bg-gray-400 py-4">
         <div className="max-w-5xl mx-auto flex justify-between items-center">
           <Link href="/" legacyBehavior>
-            <a className="text-lg font-bold">首頁</a>
+            <a className="text-lg font-bold">[ 首頁 ]</a>
           </Link>
           <div className="flex space-x-4">
             <Link href="/punch-v2" legacyBehavior>
-              <a className="text-lg font-bold">[打卡]</a>
+              <a className="text-lg font-bold">[ 打卡 ]</a>
             </Link>
             <Link href="/member-system" legacyBehavior>
-              <a className="text-lg font-bold">[管理員專區]</a>
+              <a className="text-lg font-bold">[ 管理員專區 ]</a>
             </Link>
             {currentUserEmail && (
               <>
                 <span className="text-lg font-bold">{currentUserEmail} 你好！</span>
-                  <button
-                    onClick={handleLogout}
-                    className="text-lg font-bold"
-                  >
-                    登出 &gt;&gt;
-                  </button>
               </>
             )}
           </div>
