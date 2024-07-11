@@ -7,8 +7,8 @@
 # Next.js cache
 .next/cache
 
-# Node.js modules
-node_modules/
+# # Node.js modules
+# node_modules/
 
 # 日誌文件
 logs
@@ -34,4 +34,3 @@ Thumbs.db
 # 忽略打包輸出的文件夾
 dist/
 build/
-.DS_Store
