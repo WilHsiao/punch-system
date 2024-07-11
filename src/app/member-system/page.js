@@ -2,44 +2,23 @@
 
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/config/firebaseConfig';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Navigation from '@/components/navigation';
+import withInactivityHandler from '@/components/auto-logout';
 
-export default function Login() {
+function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [user, setUser] = useState(null);
-    const inactivityTimeoutRef = useRef(null);
-
-    const logoutDueToInactivity = async () => {
-        toast.info('由於長時間未操作，已自動登出。');
-        await handleLogout();
-    };
-
-    const resetInactivityTimeout = () => {
-        if (inactivityTimeoutRef.current) {
-            clearTimeout(inactivityTimeoutRef.current);
-        }
-        inactivityTimeoutRef.current = setTimeout(logoutDueToInactivity, 15 * 60 * 1000); // 15 分鐘
-    };
-
-    const handleUserActivity = () => {
-        resetInactivityTimeout();
-    };
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             if (user) {
                 setUser(user);
-                resetInactivityTimeout();
-                window.addEventListener('mousemove', handleUserActivity);
-                window.addEventListener('keydown', handleUserActivity);
-                window.addEventListener('click', handleUserActivity);
             } else {
                 setUser(null);
             }
@@ -47,10 +26,6 @@ export default function Login() {
 
         return () => {
             unsubscribe();
-            clearTimeout(inactivityTimeoutRef.current);
-            window.removeEventListener('mousemove', handleUserActivity);
-            window.removeEventListener('keydown', handleUserActivity);
-            window.removeEventListener('click', handleUserActivity);
         };
     }, []);
 
@@ -60,7 +35,6 @@ export default function Login() {
         try {
             await signInWithEmailAndPassword(auth, email, password);
             toast.success('登入成功！');
-            resetInactivityTimeout();
         } catch (error) {
             console.error(error);
             setError('登入失敗，請檢查您的電子郵件和密碼。');
@@ -83,7 +57,6 @@ export default function Login() {
 
     return (
     	<>
-    	<Navigation />
         <div className="flex flex-col items-center justify-start h-1/3 p-24">
             {user ? (
                     <>
@@ -120,3 +93,5 @@ export default function Login() {
         </>
     );
 }
+
+export default withInactivityHandler(Login);
