@@ -7,7 +7,6 @@ import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { ref, set } from 'firebase/database';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Navigation from '@/components/navigation';
 import PasswordUnlock from '@/components/page-pw-unlock';
 
 export default function Register() {
@@ -45,7 +44,6 @@ export default function Register() {
     if (!accessGranted) {
         return (
             <>
-                <Navigation />
                 <PasswordUnlock onUnlock={() => setAccessGranted(true)} />
             </>
         );
@@ -53,7 +51,6 @@ export default function Register() {
 
     return (
         <>
-            <Navigation />
             <div className="flex flex-col items-center justify-start h-1/3 p-24">
                 <h1>新增人員</h1>
                 {error && <p style={{ color: 'red' }}>{error}</p>}
