@@ -1,24 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
-import { auth } from '@/config/firebaseConfig';
-import { onAuthStateChanged } from 'firebase/auth';
 
 export default function Navigation(){
-  const [currentUserEmail, setCurrentUserEmail] = useState('');
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setCurrentUserEmail(user.email);
-      } else {
-        setCurrentUserEmail('');
-      }
-    });
-    return () => unsubscribe();
-  }, []);
-
   return (
     <>
       <nav className="w-full bg-gray-400 py-4">
@@ -33,11 +17,6 @@ export default function Navigation(){
             <Link href="/member-system" legacyBehavior>
               <a className="text-lg font-bold">[ 管理員專區 ]</a>
             </Link>
-            {currentUserEmail && (
-              <>
-                <span className="text-lg font-bold">{currentUserEmail} 你好！</span>
-              </>
-            )}
           </div>
         </div>
       </nav>

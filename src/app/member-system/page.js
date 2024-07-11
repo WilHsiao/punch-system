@@ -87,7 +87,7 @@ export default function Login() {
         <div className="flex flex-col items-center justify-start h-1/3 p-24">
             {user ? (
                     <>
-                        <h1>歡迎, {user.email}</h1>
+                        <h1>{user.email}, 你好！</h1>
                         <button onClick={handleLogout}>[ 登出 ]</button>
                     </>
                 ) : (
