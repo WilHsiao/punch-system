@@ -1,3 +1,5 @@
+// src/components/navigation
+
 'use client';
 
 import Link from 'next/link';
@@ -14,8 +16,8 @@ export default function Navigation(){
             <Link href="/punch-v2" legacyBehavior>
               <a className="text-lg font-bold">[ 打卡 ]</a>
             </Link>
-            <Link href="/member-system" legacyBehavior>
-              <a className="text-lg font-bold">[ 管理員專區 ]</a>
+            <Link href="/login" legacyBehavior>
+              <a className="text-lg font-bold">[ 管理員登入 ]</a>
             </Link>
           </div>
         </div>

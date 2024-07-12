@@ -36,8 +36,8 @@ export default function Punch() {
         // 清理函數
         isProcessing.current = false;
         unsubscribe();
-    };
-}, []);
+        };
+    }, []);
 
     const handleScan = async (data) => {
         const now = Date.now();
