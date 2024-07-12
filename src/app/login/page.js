@@ -63,49 +63,52 @@ export default function Login() {
 
     return (
     	<>
-        <div className="flex flex-col items-center justify-start h-1/3 p-24">
-            {user ? (
-                    <>
-                        <h1>{user.email}, 你好！</h1>
-                        <button
-                        onClick={handleLogout}
-                        className="mt-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-700"
+          <div className="min-h-screen flex items-center justify-center bg-gray-100">
+            <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-lg" style={{ marginTop: '-15%' }}>
+              {user ? (
+                <>
+                  <h1 className="text-xl font-bold mb-4">{user.email}, 你好！</h1>
+                  <button
+                    onClick={handleLogout}
+                    className="mt-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-700 transition duration-300"
+                  >
+                    [ 登出 ]
+                  </button>
+                </>
+              ) : (
+                <>
+                  <h1 className="text-2xl font-bold mb-4">登入頁面</h1>
+                  <form onSubmit={handleLogin} className="flex flex-col items-center w-full">
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="請輸入信箱"
+                      className="mb-3 w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      autoComplete="email"
+                    />
+                    <input
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="請輸入密碼"
+                      className="mb-3 w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      autoComplete="current-password"
+                    />
+                    <button
+                      type="submit"
+                      className="mt-4 w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700 transition duration-300"
                     >
-                        [ 登出 ]
+                      登入
                     </button>
-                    </>
-                ) : (
-                    <>
-                        <h1 className="text-2xl mb-4">登入頁面</h1>
-                        <form onSubmit={handleLogin} className="flex flex-col items-center w-80">
-                            <input
-                                type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                placeholder="請輸入信箱"
-                                className="mb-2 px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                autoComplete="email"
-                            />
-                            <input
-                                type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                placeholder="請輸入密碼"
-                                className="mb-2 px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                autoComplete="current-password"
-                            />
-                            <button
-                                type="submit"
-                                className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700"
-                            >
-                                登入
-                            </button>
-                            {error && <p style={{ color: 'red' }}>{error}</p>}
-                        </form>
-                    </>
-                )}
-                <ToastContainer />
+                    {error && <p className="text-red-500 mt-2">{error}</p>}
+                  </form>
+                </>
+              )}
+              <ToastContainer />
             </div>
+          </div>
         </>
+
     );
 }
