@@ -1,6 +1,8 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Navigation from '@/components/navigation';
+import { AuthProvider } from '@/context/auth-context';
+import { EventProvider } from '@/context/event-context';
 
 
 const inter = Inter({ subsets: ["latin"] });
@@ -14,8 +16,12 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={inter.className}>
-        <Navigation />
-        {children}
+        <AuthProvider>
+          <EventProvider>
+            <Navigation />
+            {children}
+          </EventProvider>
+        </AuthProvider>
       </body>
     </html>
   );
