@@ -7,7 +7,6 @@ import { ref, set, get } from 'firebase/database';
 import { onAuthStateChanged } from 'firebase/auth';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-// import Navigation from '@/components/navigation';
 
 export default function PunchManual() {
     const [uid, setUid] = useState('');
@@ -62,7 +61,6 @@ export default function PunchManual() {
 
     return (
         <>
-            {/*<Navigation />*/}
             <div className="flex flex-col items-center justify-center h-1/3 space-y-6 p-24">
                 <h1>補打卡系統</h1>
                 <div className="flex flex-col items-center">

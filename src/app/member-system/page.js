@@ -7,13 +7,13 @@ import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebas
 import { auth } from '@/config/firebaseConfig';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import withInactivityHandler from '@/components/auto-logout';
 
-function Login() {
+export default function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -22,6 +22,7 @@ function Login() {
             } else {
                 setUser(null);
             }
+            setLoading(false);
         });
 
         return () => {
@@ -34,18 +35,19 @@ function Login() {
         setError('');
         try {
             await signInWithEmailAndPassword(auth, email, password);
-            toast.success('登入成功！');
+            toast.success('登入成功！', { autoClose: 1000 });
         } catch (error) {
             console.error(error);
-            setError('登入失敗，請檢查您的電子郵件和密碼。');
-            toast.error('登入失敗，請檢查您的電子郵件和密碼。');
+            setError('登入失敗，請填寫正確的電子郵件和密碼。');
+        } finally {
+            setLoading(false);
         }
     };
 
     const handleLogout = async () => {
         try {
             await signOut(auth);
-            toast.success('已成功登出');
+            toast.info('已登出', { autoClose: 1000 });
             setUser(null);
             setEmail('');
             setPassword('');
@@ -54,6 +56,10 @@ function Login() {
             toast.error('登出失敗，請重試');
         }
     };
+
+    if (loading) {
+        return <div className="flex flex-col items-center justify-center h-1/3 p-24">載入中...</div>;
+    }
 
     return (
     	<>
@@ -93,5 +99,3 @@ function Login() {
         </>
     );
 }
-
-export default withInactivityHandler(Login);
