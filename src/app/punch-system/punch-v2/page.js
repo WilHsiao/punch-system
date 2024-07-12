@@ -126,49 +126,56 @@ export default function Punch() {
 
     return (
         <>
-            <div className="flex flex-col items-center justify-center h-1/3 space-y-6 p-24">
-                <h1>管理員登入後才能開啟打卡系統！</h1>
-                <div className="flex items-center justify-center space-x-2">
-                    <label htmlFor="punchType" className="mb-2">打卡類型:</label>
-                    <div className="p-2 border border-gray-300">
-                        <div>
-                            <input
-                                type="radio"
-                                id="punchTypeStart"
-                                name="punchType"
-                                value="上班"
-                                checked={punchType === "上班"}
-                                onChange={handlePunchTypeChange}
-                            />
-                            <label htmlFor="punchTypeStart" className="ml-2">上班</label>
-                        </div>
-                        <div>
-                            <input
-                                type="radio"
-                                id="punchTypeEnd"
-                                name="punchType"
-                                value="下班"
-                                checked={punchType === "下班"}
-                                onChange={handlePunchTypeChange}
-                            />
-                            <label htmlFor="punchTypeEnd" className="ml-2">下班</label>
-                        </div>
-                    </div>
+          <div className="min-h-screen flex items-center justify-center bg-gray-100">
+            <div
+            className="flex flex-col items-center justify-center space-y-6 p-8 bg-white rounded-lg shadow-lg w-full max-w-md"
+            style={{ marginTop: '-15%' }}
+            >
+              <div className="flex items-center justify-center space-x-4 mb-4">
+                <label htmlFor="punchType" className="font-medium">打卡類型:</label>
+                <div className="flex items-center p-2 border border-gray-300 rounded space-x-4">
+                  <div className="flex items-center">
+                    <input
+                      type="radio"
+                      id="punchTypeStart"
+                      name="punchType"
+                      value="上班"
+                      checked={punchType === "上班"}
+                      onChange={handlePunchTypeChange}
+                      className="form-radio"
+                    />
+                    <label htmlFor="punchTypeStart" className="ml-2">上班</label>
+                  </div>
+                  <div className="flex items-center">
+                    <input
+                      type="radio"
+                      id="punchTypeEnd"
+                      name="punchType"
+                      value="下班"
+                      checked={punchType === "下班"}
+                      onChange={handlePunchTypeChange}
+                      className="form-radio"
+                    />
+                    <label htmlFor="punchTypeEnd" className="ml-2">下班</label>
+                  </div>
                 </div>
-                <div className="flex justify-center items-center">
-                    {scanning && (
-                        <div style={{ width: '100%', height: '100%' }}>
-                            <QrReader
-                                delay={300}
-                                onError={handleError}
-                                onScan={handleScan}
-                                style={{ width: '100%', height: '100%' }}
-                            />
-                        </div>
-                    )}
-                </div>
+              </div>
+              <div className="flex justify-center items-center w-full">
+                {scanning && (
+                  <div className="w-full h-full">
+                    <QrReader
+                      delay={300}
+                      onError={handleError}
+                      onScan={handleScan}
+                      style={{ width: '100%', height: '100%' }}
+                    />
+                  </div>
+                )}
+              </div>
             </div>
-            <ToastContainer />
+          </div>
+          <ToastContainer />
         </>
+
     );
 }

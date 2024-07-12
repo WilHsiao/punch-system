@@ -8,8 +8,8 @@ import { EventProvider } from '@/context/event-context';
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "打卡系統 v.2",
-  description: "簡易打卡系統",
+  title: "簡易ERP系統",
+  description: "簡易ERP系統",
 };
 
 export default function RootLayout({ children }) {
@@ -23,6 +23,9 @@ export default function RootLayout({ children }) {
           </EventProvider>
         </AuthProvider>
       </body>
+      <footer className="w-full flex items-center justify-center py-4 bg-gray-200">
+    © 2024 Yu.
+  </footer>
     </html>
   );
 }
