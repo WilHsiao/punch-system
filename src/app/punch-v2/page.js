@@ -8,7 +8,6 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import dynamic from 'next/dynamic';
-// import Navigation from '@/components/navigation';
 const QrReader = dynamic(() => import('react-qr-scanner'), { ssr: false }); // 動態加載 QrReader 組件，只在客戶端渲染
 
 export default function Punch() {
@@ -22,7 +21,7 @@ export default function Punch() {
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             if (user) {
-                toast.info("歡迎使用打卡系統！", { autoClose: 2000 });
+                console.log('管理員已登入');
             } else {
                 toast.error('請前往管理員專區登入！', { autoClose: 2000 });
             }
@@ -123,12 +122,10 @@ export default function Punch() {
         const selectedPunchType = e.target.value;
         setPunchType(selectedPunchType);
         localStorage.setItem('punchType', selectedPunchType); // 儲存到local端
-        window.location.reload();
     };
 
     return (
         <>
-            {/*<Navigation />*/}
             <div className="flex flex-col items-center justify-center h-1/3 space-y-6 p-24">
                 <h1>管理員登入後才能開啟打卡系統！</h1>
                 <div className="flex items-center justify-center space-x-2">
