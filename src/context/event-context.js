@@ -19,7 +19,7 @@ export const EventProvider = ({ children }) => {
           logout();
           alert('因閒置時間過長，已自動登出。');
         }
-      }, 15 * 60 * 1000);
+      }, 1 * 60 * 1000);
     };
 
     const events = ['load', 'mousemove', 'mousedown', 'click', 'scroll', 'keypress'];
