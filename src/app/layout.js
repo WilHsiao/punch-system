@@ -9,7 +9,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
   title: "簡易ERP系統",
-  description: "簡易ERP系統",
+  description: "我是簡易ERP系統我是簡易ERP系統我是簡易ERP系統",
 };
 
 export default function RootLayout({ children }) {
@@ -22,10 +22,10 @@ export default function RootLayout({ children }) {
             {children}
           </EventProvider>
         </AuthProvider>
+        <footer className="w-full flex items-center justify-center py-4 bg-gray-800 text-white text-sm">
+          © 2024 Yu.
+        </footer>
       </body>
-      <footer className="w-full flex items-center justify-center py-4 bg-gray-200">
-    © 2024 Yu.
-  </footer>
     </html>
   );
 }

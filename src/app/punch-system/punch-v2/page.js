@@ -1,4 +1,4 @@
-// src/app/punch
+// src/app/punch-system/punch-v2
 
 'use client';
 import { useState, useRef, useEffect } from 'react';
@@ -9,6 +9,8 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import dynamic from 'next/dynamic';
 const QrReader = dynamic(() => import('react-qr-scanner'), { ssr: false }); // 動態加載 QrReader 組件，只在客戶端渲染
+
+
 
 export default function Punch() {
     const [name, setName] = useState('');
@@ -129,8 +131,9 @@ export default function Punch() {
           <div className="min-h-screen flex items-center justify-center bg-gray-100">
             <div
             className="flex flex-col items-center justify-center space-y-6 p-8 bg-white rounded-lg shadow-lg w-full max-w-md"
-            style={{ marginTop: '-15%' }}
+            style={{ marginTop: '-30%' }}
             >
+            <h1 className="text-2xl font-bold">【 一般打卡 】</h1>
               <div className="flex items-center justify-center space-x-4 mb-4">
                 <label htmlFor="punchType" className="font-medium">打卡類型:</label>
                 <div className="flex items-center p-2 border border-gray-300 rounded space-x-4">
