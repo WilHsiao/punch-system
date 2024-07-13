@@ -1,4 +1,4 @@
-// src/pages/punch-manual
+// src/app/punch-system/punch-manual
 
 'use client';
 import { useState, useEffect } from 'react';
@@ -7,6 +7,7 @@ import { ref, set, get } from 'firebase/database';
 import { onAuthStateChanged } from 'firebase/auth';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import PasswordUnlock from '@/hooks/page-pw-unlock';
 
 export default function PunchManual() {
     const [uid, setUid] = useState('');
@@ -14,13 +15,14 @@ export default function PunchManual() {
     const [date, setDate] = useState('');
     const [time, setTime] = useState('');
     const [punchType, setPunchType] = useState('');
+    const [unlocked, setUnlocked] = useState(false); // 用於控制是否解鎖
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             if (user) {
-                toast.info("歡迎使用打卡系統！", { autoClose: 2000 });
+                console.log('管理員已登入');
             } else {
-                toast.error('請前往管理員專區登入！', { autoClose: 2000 });
+                toast.error('請前往管理員專區登入！', { autoClose: 3000 });
             }
         });
 
@@ -29,7 +31,7 @@ export default function PunchManual() {
 
     const handleManualPunch = async () => {
         if (!uid || !date || !time || !punchType) {
-            toast.error('請完整填寫所有欄位！', { autoClose: 2000 });
+            toast.error('請完整填寫所有欄位！', { autoClose: 3000 });
             return;
         }
 
@@ -42,31 +44,39 @@ export default function PunchManual() {
                 const userData = userSnapshot.val();
                 setName(userData.name);
 
-                const punchData = { timestamp: punchTimestamp, type: punchType };
+                const punchData = {
+                    timestamp: punchTimestamp,
+                    type: punchType,
+                    tag: "補打卡"
+                };
                 const punchRef = ref(database, `punches/${uid}/${new Date(punchTimestamp).toISOString().replace(/\W/g, '')}`);
                 await set(punchRef, punchData);
                 console.log("Punch recorded successfully.");
-                toast.success(`${userData.name} 的補打卡成功！`, { autoClose: 2000 });
+                toast.success(`${userData.name} 的補打卡成功！`, { autoClose: 1000 });
                 setUid('');
                 setTime('');
                 setDate('');
             } else {
-                toast.error('用戶不存在！', { autoClose: 2000 });
+                toast.error('用戶不存在！', { autoClose: 1000 });
             }
         } catch (error) {
             console.error("Error handling manual punch: ", error);
-            toast.error('補打卡過程出現錯誤', { autoClose: 2000 });
+            toast.error('補打卡過程出現錯誤', { autoClose: 1000 });
         }
     };
+
+    if (!unlocked) {
+        return <PasswordUnlock onUnlock={() => setUnlocked(true)} />; // 顯示密碼解鎖頁面
+    }
 
     return (
         <>
           <div className="min-h-screen flex items-center justify-center bg-gray-100">
             <div
             className="flex flex-col items-center justify-center space-y-6 p-8 bg-white rounded-lg shadow-lg"
-            style={{ marginTop: '-15%' }}
+            style={{ marginTop: '-30%' }}
             >
-              <h1 className="text-2xl font-bold">補打卡系統</h1>
+              <h1 className="text-2xl font-bold">【 補打卡 】</h1>
               <div className="flex flex-col items-center w-full max-w-md">
                 <input
                   type="text"
