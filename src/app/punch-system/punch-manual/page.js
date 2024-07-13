@@ -1,4 +1,4 @@
-// src/app/punch-system/punch-manual
+// */punch-system/punch-manual
 
 'use client';
 import { useState, useEffect } from 'react';

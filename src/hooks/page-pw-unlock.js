@@ -1,4 +1,4 @@
-// src/hooks/page-pw-unlock
+// @/hooks/page-pw-unlock
 
 import { useState } from 'react';
 import { ToastContainer, toast } from 'react-toastify';

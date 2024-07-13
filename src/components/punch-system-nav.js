@@ -1,4 +1,4 @@
-// src/components/punch-system-nav
+// @/components/punch-system-nav
 
 'use client';
 

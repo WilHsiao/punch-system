@@ -1,4 +1,4 @@
-// src/context/auth-context
+// @/context/auth-context
 
 'use client';
 
