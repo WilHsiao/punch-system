@@ -1,4 +1,4 @@
-// src/app/punch-system-home
+// */punch-system
 
 export default function PunchSystemPage() {
   return (

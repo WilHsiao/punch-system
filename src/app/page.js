@@ -1,4 +1,4 @@
-// src/app/首頁
+// Web App Home Page
 
 export default function Home() {
   return (

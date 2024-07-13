@@ -1,3 +1,5 @@
+// Punch system layout
+
 import Link from 'next/link';
 import PunchSystemNav from '@/components/punch-system-nav';
 

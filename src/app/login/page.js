@@ -1,4 +1,4 @@
-// src/pages/login
+// */login
 
 'use client';
 
@@ -21,6 +21,8 @@ export default function Login() {
                 setUser(user);
             } else {
                 setUser(null);
+                setEmail('');
+                setPassword('');
             }
             setLoading(false);
         });
@@ -72,7 +74,7 @@ export default function Login() {
                     onClick={handleLogout}
                     className="mt-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-700 transition duration-300"
                   >
-                    [ 登出 ]
+                    登出
                   </button>
                 </>
               ) : (

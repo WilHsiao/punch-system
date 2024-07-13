@@ -1,4 +1,4 @@
-// src/config/firebaseConfig.js
+// @/config/firebaseConfig
 
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';

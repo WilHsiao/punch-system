@@ -1,8 +1,8 @@
-// src/context/event-context
+// @/context/event-context
 
 'use client';
 
-import { createContext, useEffect, useContext } from 'react';
+import { createContext, useEffect } from 'react';
 import { useAuth } from './auth-context';
 
 const EventContext = createContext();

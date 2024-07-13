@@ -1,4 +1,4 @@
-// src/components/navigation
+// @/components/navigation
 
 'use client';
 
