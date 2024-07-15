@@ -17,6 +17,7 @@ export default function Punch() {
     const [uid, setUid] = useState('');
     const [scanning, setScanning] = useState(true);
     const [punchType, setPunchType] = useState('');
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
     const lastScanTime = useRef(Date.now());
     const isProcessing = useRef(false);
 
@@ -24,8 +25,10 @@ export default function Punch() {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             if (user) {
                 console.log('管理員已登入');
+                setIsAuthenticated(true);
             } else {
                 toast.error('請前往管理員專區登入！', { autoClose: 2000 });
+                setIsAuthenticated(false);
             }
         });
 
@@ -126,11 +129,21 @@ export default function Punch() {
         localStorage.setItem('punchType', selectedPunchType); // 儲存到local端
     };
 
+    if (!isAuthenticated) {
+        return (
+            <div className="flex min-h-screen flex-col items-center justify-between p-24">
+                <div className="flex flex-col items-center justify-start h-1/3 w-full max-w-5xl font-mono text-sm text-center">
+                    <h1 className="text-2xl font-bold">管理員須先登入！</h1>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <>
           <div className="min-h-screen flex items-center justify-center">
             <div
-            className="flex flex-col items-center justify-center space-y-6 p-8 bg-white rounded-lg shadow-lg w-full max-w-md"
+            className="flex flex-col items-center justify-center space-y-6 p-8 bg-white rounded-lg shadow-lg w-full max-w-xl"
             style={{ marginTop: '-30%' }}
             >
             <h1 className="text-2xl font-bold text-gray-700">【 一般打卡 】</h1>
