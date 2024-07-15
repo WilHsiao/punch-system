@@ -18,7 +18,7 @@ export default function PunchSystemLayout({ children }) {
             ERP系統&nbsp;&nbsp;▻&nbsp;&nbsp;打卡系統
           </h1>
         </header>
-        <main className="flex-grow bg-gray-100 py-8">
+        <main className="flex-grow py-8">
           <div className="max-w-5xl mx-auto px-4">
             {children}
           </div>

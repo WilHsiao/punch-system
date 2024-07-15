@@ -128,16 +128,16 @@ export default function Punch() {
 
     return (
         <>
-          <div className="min-h-screen flex items-center justify-center bg-gray-100">
+          <div className="min-h-screen flex items-center justify-center">
             <div
             className="flex flex-col items-center justify-center space-y-6 p-8 bg-white rounded-lg shadow-lg w-full max-w-md"
             style={{ marginTop: '-30%' }}
             >
-            <h1 className="text-2xl font-bold">【 一般打卡 】</h1>
+            <h1 className="text-2xl font-bold text-gray-700">【 一般打卡 】</h1>
               <div className="flex items-center justify-center space-x-4 mb-4">
-                <label htmlFor="punchType" className="font-medium">打卡類型:</label>
+                <label htmlFor="punchType" className="font-medium text-gray-700">打卡類型：</label>
                 <div className="flex items-center p-2 border border-gray-300 rounded space-x-4">
-                  <div className="flex items-center">
+                  <div className="flex items-center text-gray-700 font-bold">
                     <input
                       type="radio"
                       id="punchTypeStart"
@@ -149,7 +149,7 @@ export default function Punch() {
                     />
                     <label htmlFor="punchTypeStart" className="ml-2">上班</label>
                   </div>
-                  <div className="flex items-center">
+                  <div className="flex items-center text-gray-700 font-bold">
                     <input
                       type="radio"
                       id="punchTypeEnd"

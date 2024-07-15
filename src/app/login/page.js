@@ -65,7 +65,10 @@ export default function Login() {
 
     return (
     	<>
-          <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="flex justify-center items-center pt-24 pr-24 pl-24">
+            <h1 className="text-3xl font-bold">登入系統</h1>
+          </div>
+            <div className="min-h-screen flex items-center justify-center">
             <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-lg" style={{ marginTop: '-15%' }}>
               {user ? (
                 <>
@@ -79,24 +82,29 @@ export default function Login() {
                 </>
               ) : (
                 <>
-                  <h1 className="text-2xl font-bold mb-4">登入頁面</h1>
                   <form onSubmit={handleLogin} className="flex flex-col items-center w-full">
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="請輸入信箱"
-                      className="mb-3 w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      autoComplete="email"
-                    />
-                    <input
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="請輸入密碼"
-                      className="mb-3 w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      autoComplete="current-password"
-                    />
+                    <div className="mb-3 w-full flex items-center">
+                          <h2 className="w-1/5 text-left text-gray-700 font-bold pr-4">信箱</h2>
+                          <input
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            placeholder="請輸入信箱"
+                            className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            autoComplete="email"
+                          />
+                        </div>
+                    <div className="mb-3 w-full flex items-center">
+                          <h2 className="w-1/5 text-left text-gray-700 font-bold pr-4">密碼</h2>
+                          <input
+                            type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            placeholder="請輸入密碼"
+                            className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            autoComplete="current-password"
+                          />
+                        </div>
                     <button
                       type="submit"
                       className="mt-4 w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700 transition duration-300"
