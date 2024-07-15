@@ -14,22 +14,6 @@
     --background-start-rgb: 0, 0, 0;
     --background-end-rgb: 0, 0, 0;
   }
-
-  input, textarea, select {
-    background-color: #333;
-    color: white;
-    border: 1px solid #555;
-  }
-
-  input:focus, textarea:focus, select:focus {
-    outline: none;
-    border-color: #0080ff;
-    box-shadow: 0 0 0 2px rgba(0, 128, 255, 0.2);
-  }
-
-  input::placeholder, textarea::placeholder {
-    color: #999;
-  }
 }
 
 body {
