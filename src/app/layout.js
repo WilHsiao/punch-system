@@ -3,9 +3,6 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Navigation from '@/components/navigation';
-import { AuthProvider } from '@/context/auth-context';
-import { EventProvider } from '@/context/event-context';
-
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,14 +15,12 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={inter.className}>
-        <AuthProvider>
-          <EventProvider>
-            <Navigation />
-            {children}
-          </EventProvider>
-        </AuthProvider>
+        {/*<AuthProvider><EventProvider>*/}
+          <Navigation />
+          {children}
+        {/*</EventProvider></AuthProvider>*/}
         <footer className="w-full flex items-center justify-center py-4 bg-gray-800 text-white text-sm">
-          © 2024 Yu.
+          © 2024 Yu
         </footer>
       </body>
     </html>
