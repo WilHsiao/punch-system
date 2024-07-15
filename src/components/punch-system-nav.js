@@ -19,6 +19,11 @@ export default function PunchSystemNav(){
               補打卡
             </a>
           </Link>
+          <Link href="/punch-system/query-punch-data" legacyBehavior>
+            <a className="text-lg font-bold bg-blue-300 text-black px-4 py-2 rounded hover:bg-blue-400 transition duration-300">
+              查詢打卡資料
+            </a>
+          </Link>
         </div>
       </nav>
     </>
