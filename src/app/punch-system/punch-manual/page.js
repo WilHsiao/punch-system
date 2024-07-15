@@ -73,7 +73,7 @@ export default function PunchManual() {
         <>
           <div className="min-h-screen flex items-center justify-center">
             <div
-            className="flex flex-col items-center justify-center space-y-6 p-8 bg-white rounded-lg shadow-lg"
+            className="flex flex-col items-center justify-center space-y-6 p-8 bg-white rounded-lg shadow-lg w-full max-w-xl"
             style={{ marginTop: '-30%' }}
             >
               <h1 className="text-2xl font-bold text-gray-700">【 補打卡 】</h1>
@@ -83,19 +83,19 @@ export default function PunchManual() {
                   value={uid}
                   onChange={(e) => setUid(e.target.value)}
                   placeholder="請輸入用戶 UID"
-                  className="mb-4 px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+                  className="mb-4 px-4 py-2 border border-gray-300 text-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
                 />
                 <input
                   type="date"
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
-                  className="mb-4 px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+                  className="mb-4 px-4 py-2 border border-gray-300 text-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
                 />
                 <input
                   type="time"
                   value={time}
                   onChange={(e) => setTime(e.target.value)}
-                  className="mb-4 px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+                  className="mb-4 px-4 py-2 border border-gray-300 text-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
                 />
                 <div className="flex items-center justify-center space-x-2 mb-4">
                   <label htmlFor="punchType" className="font-medium text-gray-700 font-bold">打卡類型:</label>
