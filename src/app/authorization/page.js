@@ -37,10 +37,10 @@ export default function Login() {
         setError('');
         try {
             await signInWithEmailAndPassword(auth, email, password);
-            toast.success('登入成功！', { autoClose: 1000 });
+            toast.success('授權成功！', { autoClose: 1000 });
         } catch (error) {
             console.error(error);
-            setError('登入失敗，請填寫正確的電子郵件和密碼。');
+            setError('授權失敗，請填寫正確的電子郵件和密碼。');
         } finally {
             setLoading(false);
         }
@@ -87,7 +87,7 @@ export default function Login() {
                       type="submit"
                       className="mt-4 w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700 transition duration-300"
                     >
-                      登入
+                      授權
                     </button>
                     {error && <p className="text-red-500 mt-2">{error}</p>}
                   </form>
