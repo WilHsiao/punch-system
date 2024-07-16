@@ -20,9 +20,9 @@ export default function PunchManual() {
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             if (user) {
-                console.log('管理員已登入');
+                console.log('管理員已授權');
             } else {
-                toast.error('請前往管理員專區登入！', { autoClose: 3000 });
+                toast.error('請通知管理員進行授權！', { autoClose: 3000 });
             }
         });
 
