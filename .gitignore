@@ -30,4 +30,4 @@ dist/
 build/
 
 # 機密資料
-scr/config/
+src/config/
