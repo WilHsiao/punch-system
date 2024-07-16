@@ -28,3 +28,6 @@ Thumbs.db
 # 忽略打包輸出的文件夾
 dist/
 build/
+
+# 機密資料
+scr/config/
