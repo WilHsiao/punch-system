@@ -24,10 +24,10 @@ export default function Punch() {
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             if (user) {
-                console.log('管理員已登入');
+                console.log('管理員已授權');
                 setIsAuthenticated(true);
             } else {
-                toast.error('請前往管理員專區登入！', { autoClose: 2000 });
+                toast.error('請通知管理員進行授權！', { autoClose: 2000 });
                 setIsAuthenticated(false);
             }
         });
@@ -133,7 +133,7 @@ export default function Punch() {
         return (
             <div className="flex min-h-screen flex-col items-center justify-between p-24">
                 <div className="flex flex-col items-center justify-start h-1/3 w-full max-w-5xl font-mono text-sm text-center">
-                    <h1 className="text-2xl font-bold">管理員須先登入！</h1>
+                    <h1 className="text-2xl font-bold">管理員須先授權！</h1>
                 </div>
             </div>
         );
