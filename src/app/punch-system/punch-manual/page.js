@@ -72,71 +72,47 @@ export default function PunchManual() {
     return (
         <>
           <div className="min-h-screen flex items-center justify-center">
-            <div
-            className="flex flex-col items-center justify-center space-y-6 p-8 bg-white rounded-lg shadow-lg w-full max-w-xl"
-            style={{ marginTop: '-30%' }}
-            >
+            <div className="flex flex-col items-center justify-center space-y-6 p-8 bg-white rounded-lg shadow-lg w-full max-w-xl mt-[-30%]">
               <h1 className="text-2xl font-bold text-gray-700">【 補打卡 】</h1>
-              <div className="flex flex-col items-center w-full max-w-md">
-                <input
-                  type="text"
-                  value={uid}
-                  onChange={(e) => setUid(e.target.value)}
-                  placeholder="請輸入用戶 UID"
-                  className="mb-4 px-4 py-2 border border-gray-300 text-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
-                />
-                <input
-                  type="date"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  className="mb-4 px-4 py-2 border border-gray-300 text-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
-                />
-                <input
-                  type="time"
-                  value={time}
-                  onChange={(e) => setTime(e.target.value)}
-                  className="mb-4 px-4 py-2 border border-gray-300 text-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
-                />
-                <div className="flex items-center justify-center space-x-2 mb-4">
-                  <label htmlFor="punchType" className="font-medium text-gray-700 font-bold">打卡類型:</label>
-                  <div className="flex items-center p-2 border border-gray-300 rounded space-x-4">
-                    <div className="flex items-center text-gray-700 font-bold">
-                      <input
-                        type="radio"
-                        id="punchTypeStart"
-                        name="punchType"
-                        value="上班"
-                        checked={punchType === "上班"}
-                        onChange={(e) => setPunchType(e.target.value)}
-                        className="form-radio"
-                      />
-                      <label htmlFor="punchTypeStart" className="ml-2">上班</label>
-                    </div>
-                    <div className="flex items-center text-gray-700 font-bold">
-                      <input
-                        type="radio"
-                        id="punchTypeEnd"
-                        name="punchType"
-                        value="下班"
-                        checked={punchType === "下班"}
-                        onChange={(e) => setPunchType(e.target.value)}
-                        className="form-radio"
-                      />
-                      <label htmlFor="punchTypeEnd" className="ml-2">下班</label>
-                    </div>
-                  </div>
+              {[
+                { label: 'UID', type: 'text', value: uid, onChange: setUid, placeholder: '請輸入用戶 UID' },
+                { label: '日期', type: 'date', value: date, onChange: setDate },
+                { label: '時間', type: 'time', value: time, onChange: setTime }
+              ].map(({ label, type, value, onChange, placeholder }, idx) => (
+                <div key={idx} className="mb-3 w-full flex items-center">
+                  <h2 className="w-1/5 text-left text-gray-700 font-bold pr-4">{label}</h2>
+                  <input
+                    type={type}
+                    value={value}
+                    onChange={(e) => onChange(e.target.value)}
+                    placeholder={placeholder}
+                    className="p-2 border border-gray-300 text-gray-700 rounded w-full"
+                  />
                 </div>
-                <button
-                  onClick={handleManualPunch}
-                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700 transition duration-300"
-                >
-                  提交補打卡
-                </button>
+              ))}
+              <div className="mb-3 w-full flex flex-col items-center">
+                <label className="text-gray-700 font-bold mb-2">打卡類型</label>
+                <div className="flex space-x-4">
+                  {['上班', '下班'].map((type) => (
+                    <button
+                      key={type}
+                      className={`px-4 py-2 rounded ${punchType === type ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-700'}`}
+                      onClick={() => setPunchType(type)}
+                    >
+                      {type}
+                    </button>
+                  ))}
+                </div>
               </div>
+              <button
+                onClick={handleManualPunch}
+                className="w-3/5 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700 transition duration-300"
+              >
+                提交補打卡
+              </button>
             </div>
           </div>
           <ToastContainer />
         </>
-
     );
 }

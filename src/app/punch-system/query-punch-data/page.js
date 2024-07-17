@@ -56,6 +56,8 @@ export default function QueryPunch() {
                     style={{ marginTop: '-20%' }}
                 >
                     <h1 className="text-2xl font-bold text-gray-700">【 查詢打卡記錄 】</h1>
+                    <div className="mb-3 w-full flex items-center">
+                    <h2 className="w-1/5 text-left text-gray-700 font-bold pr-4">UID</h2>
                     <input
                         type="text"
                         placeholder="輸入 UID"
@@ -63,6 +65,9 @@ export default function QueryPunch() {
                         onChange={(e) => setUid(e.target.value)}
                         className="p-2 border border-gray-300 text-gray-700 rounded w-full"
                     />
+                    </div>
+                    <div className="mb-3 w-full flex items-center">
+                    <h2 className="w-1/5 text-left text-gray-700 font-bold pr-4">月份</h2>
                     <input
                         type="month"
                         value={date}
@@ -70,6 +75,7 @@ export default function QueryPunch() {
                         placeholder="選擇年份和月份"
                         className="p-2 border border-gray-300 text-gray-700 rounded w-full mt-2"
                     />
+                    </div>
                     <button
                         onClick={handleQuery}
                         className="bg-blue-500 text-white p-2 rounded w-full font-bold mt-2"
