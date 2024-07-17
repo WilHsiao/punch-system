@@ -26,7 +26,6 @@ export default function Punch() {
                 console.log('管理員已授權');
                 setIsAuthenticated(true);
             } else {
-                toast.error('請通知管理員進行授權！', { autoClose: 2000 });
                 setIsAuthenticated(false);
             }
             setIsLoading(false);
@@ -110,7 +109,7 @@ export default function Punch() {
 
         } catch (error) {
             console.error("Error handling punch: ", error);
-            toast.error('打卡過程出現錯誤', { autoClose: 2000 });
+            toast.error('打卡過程出現錯誤，請向管理員反映！', { autoClose: 2000 });
         } finally {
             setScanning(true);
         }
