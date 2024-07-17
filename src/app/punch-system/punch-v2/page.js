@@ -10,14 +10,13 @@ import 'react-toastify/dist/ReactToastify.css';
 import dynamic from 'next/dynamic';
 const QrReader = dynamic(() => import('react-qr-scanner'), { ssr: false }); // 動態加載 QrReader 組件，只在客戶端渲染
 
-
-
 export default function Punch() {
     const [name, setName] = useState('');
     const [uid, setUid] = useState('');
     const [scanning, setScanning] = useState(true);
     const [punchType, setPunchType] = useState('');
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     const lastScanTime = useRef(Date.now());
     const isProcessing = useRef(false);
 
@@ -30,12 +29,8 @@ export default function Punch() {
                 toast.error('請通知管理員進行授權！', { autoClose: 2000 });
                 setIsAuthenticated(false);
             }
+            setIsLoading(false);
         });
-
-        const storedPunchType = localStorage.getItem('punchType'); // 從 localStorage 中讀取打卡類型
-        if (storedPunchType) {
-            setPunchType(storedPunchType);
-        }
 
         return () => {
         // 清理函數
@@ -117,17 +112,26 @@ export default function Punch() {
             console.error("Error handling punch: ", error);
             toast.error('打卡過程出現錯誤', { autoClose: 2000 });
         } finally {
-            setTimeout(() => {
-                setScanning(true);
-            }, 1500);
+            setScanning(true);
         }
     };
 
     const handlePunchTypeChange = (e) => {
         const selectedPunchType = e.target.value;
         setPunchType(selectedPunchType);
+        setScanning(true);
         localStorage.setItem('punchType', selectedPunchType); // 儲存到local端
     };
+
+    if (isLoading) {
+        return (
+            <div className="flex min-h-screen flex-col items-center justify-center p-24">
+                <div className="flex flex-col items-center justify-start h-1/3 w-full max-w-5xl font-mono text-sm text-center">
+                    <h1 className="text-2xl font-bold">載入中...</h1>
+                </div>
+            </div>
+        );
+    }
 
     if (!isAuthenticated) {
         return (
@@ -147,35 +151,20 @@ export default function Punch() {
             style={{ marginTop: '-30%' }}
             >
             <h1 className="text-2xl font-bold text-gray-700">【 一般打卡 】</h1>
-              <div className="flex items-center justify-center space-x-4 mb-4">
-                <label htmlFor="punchType" className="font-medium text-gray-700">打卡類型：</label>
-                <div className="flex items-center p-2 border border-gray-300 rounded space-x-4">
-                  <div className="flex items-center text-gray-700 font-bold">
-                    <input
-                      type="radio"
-                      id="punchTypeStart"
-                      name="punchType"
-                      value="上班"
-                      checked={punchType === "上班"}
-                      onChange={handlePunchTypeChange}
-                      className="form-radio"
-                    />
-                    <label htmlFor="punchTypeStart" className="ml-2">上班</label>
-                  </div>
-                  <div className="flex items-center text-gray-700 font-bold">
-                    <input
-                      type="radio"
-                      id="punchTypeEnd"
-                      name="punchType"
-                      value="下班"
-                      checked={punchType === "下班"}
-                      onChange={handlePunchTypeChange}
-                      className="form-radio"
-                    />
-                    <label htmlFor="punchTypeEnd" className="ml-2">下班</label>
+                <div className="mb-3 w-full flex flex-col items-center">
+                  <label className="text-gray-700 font-bold mb-2">打卡類型</label>
+                  <div className="flex space-x-4">
+                    {['上班', '下班'].map((type) => (
+                      <button
+                        key={type}
+                        className={`px-4 py-2 rounded ${punchType === type ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-700'}`}
+                        onClick={() => setPunchType(type)}
+                      >
+                        {type}
+                      </button>
+                    ))}
                   </div>
                 </div>
-              </div>
               <div className="flex justify-center items-center w-full">
                 {scanning && (
                   <div className="w-full h-full">
