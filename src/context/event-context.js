@@ -2,19 +2,19 @@
 
 'use client';
 
-import { createContext, useEffect } from 'react';
+import { createContext, useEffect, useRef } from 'react';
 import { useAuth } from './auth-context';
 
 const EventContext = createContext();
 
 export const EventProvider = ({ children }) => {
   const { user, logout } = useAuth();
-  let timeout;
+  let timeoutRef = useRef();
 
   useEffect(() => {
     const resetTimer = () => {
-      if (timeout) clearTimeout(timeout);
-      timeout = setTimeout(() => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      timeoutRef.current = setTimeout(() => {
         if (user) {
           logout();
           alert('因閒置時間過長，已自動登出。');
@@ -34,7 +34,7 @@ export const EventProvider = ({ children }) => {
       events.forEach(event => {
         document.removeEventListener(event, resetTimer);
       });
-      if (timeout) clearTimeout(timeout);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
   }, [user, logout]);
 
