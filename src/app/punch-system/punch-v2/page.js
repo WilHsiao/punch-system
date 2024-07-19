@@ -21,16 +21,44 @@ export default function Punch() {
     });
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [isAuthorized, setIsAuthorized] = useState(false);
     const lastScanTime = useRef(Date.now());
     const isProcessing = useRef(false);
 
+    // useEffect(() => {
+    //     const unsubscribe = onAuthStateChanged(auth, (user) => {
+    //         if (user) {
+    //             console.log('管理員已授權');
+    //             setIsAuthenticated(true);
+    //         } else {
+    //             setIsAuthenticated(false);
+    //         }
+    //         setIsLoading(false);
+    //     });
+
+    //     return () => {
+    //         isProcessing.current = false;
+    //         unsubscribe();
+    //     };
+    // }, []);
+
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
             if (user) {
-                console.log('管理員已授權');
-                setIsAuthenticated(true);
+                const userRef = ref(database, `users/${user.uid}`);
+                const userSnapshot = await get(userRef);
+                if (userSnapshot.exists()) {
+                    const userData = userSnapshot.val();
+                    if (userData.role === 'admin') {
+                        setIsAuthorized(true);
+                        setIsAuthenticated(true);
+                    } else {
+                        setIsAuthorized(false);
+                    }
+                }
             } else {
                 setIsAuthenticated(false);
+                setIsAuthorized(false);
             }
             setIsLoading(false);
         });
@@ -57,7 +85,7 @@ export default function Punch() {
             console.log("QR Code detected: ", data.text);
             setUid(data.text);
             setScanning(false);
-            
+
             const currentPunchType = localStorage.getItem('punchType') || punchType;
             if (!currentPunchType) {
                 toast.error('請選擇打卡類型！', { autoClose: 2000 });
@@ -65,7 +93,7 @@ export default function Punch() {
                 isProcessing.current = false;
                 return;
             }
-            
+
             try {
                 await handlePunch(data.text, currentPunchType);
             } finally {
