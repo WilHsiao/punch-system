@@ -2,72 +2,26 @@
 
 'use client';
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { database, auth } from '@/config/firebaseConfig';
+import { database } from '@/config/firebaseConfig';
 import { set, ref, get, serverTimestamp, query, orderByChild, limitToLast } from 'firebase/database';
-import { onAuthStateChanged } from 'firebase/auth';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import dynamic from 'next/dynamic';
+import { useIamAccess } from '@/hooks/iam-access';
 
 // 動態加載 QrReader 組件，只在客戶端渲染
 const QrReader = dynamic(() => import('react-qr-scanner'), { ssr: false });
 
 export default function Punch() {
+    const { isAuthorized, isLoading } = useIamAccess(); // IAM權限控制，目前是預設admin
     const [name, setName] = useState('');
     const [uid, setUid] = useState('');
     const [scanning, setScanning] = useState(true);
     const [punchType, setPunchType] = useState(() => {
         return typeof window !== 'undefined' ? localStorage.getItem('punchType') || '' : '';
     });
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [isLoading, setIsLoading] = useState(true);
-    const [isAuthorized, setIsAuthorized] = useState(false);
     const lastScanTime = useRef(Date.now());
     const isProcessing = useRef(false);
-
-    // useEffect(() => {
-    //     const unsubscribe = onAuthStateChanged(auth, (user) => {
-    //         if (user) {
-    //             console.log('管理員已授權');
-    //             setIsAuthenticated(true);
-    //         } else {
-    //             setIsAuthenticated(false);
-    //         }
-    //         setIsLoading(false);
-    //     });
-
-    //     return () => {
-    //         isProcessing.current = false;
-    //         unsubscribe();
-    //     };
-    // }, []);
-
-    useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                const userRef = ref(database, `users/${user.uid}`);
-                const userSnapshot = await get(userRef);
-                if (userSnapshot.exists()) {
-                    const userData = userSnapshot.val();
-                    if (userData.role === 'admin') {
-                        setIsAuthorized(true);
-                        setIsAuthenticated(true);
-                    } else {
-                        setIsAuthorized(false);
-                    }
-                }
-            } else {
-                setIsAuthenticated(false);
-                setIsAuthorized(false);
-            }
-            setIsLoading(false);
-        });
-
-        return () => {
-            isProcessing.current = false;
-            unsubscribe();
-        };
-    }, []);
 
     useEffect(() => {
         const savedPunchType = localStorage.getItem('punchType');
@@ -82,29 +36,35 @@ export default function Punch() {
         // 避免瞬間感應多次打卡
         if (data && now - lastScanTime.current > 1500 && !isProcessing.current) {
             isProcessing.current = true;
+            setScanning(false); // 立即停止掃描，無論是否有選擇打卡類型
             console.log("QR Code detected: ", data.text);
             setUid(data.text);
-            setScanning(false);
 
             const currentPunchType = localStorage.getItem('punchType') || punchType;
             if (!currentPunchType) {
                 toast.error('請選擇打卡類型！', { autoClose: 2000 });
-                setScanning(true);
-                isProcessing.current = false;
+                resetScannerAfterDelay();
                 return;
             }
 
             try {
                 await handlePunch(data.text, currentPunchType);
+            } catch (error) {
+                console.error("Error handling punch: ", error);
+                toast.error('打卡過程出現錯誤，請向管理員反映！', { autoClose: 2000 });
             } finally {
-                setScanning(true);
-                lastScanTime.current = now;
-                setTimeout(() => {
-                    isProcessing.current = false;
-                }, 1500);
+                resetScannerAfterDelay();
             }
         }
     }, [punchType]);
+
+    const resetScannerAfterDelay = () => {
+        setTimeout(() => {
+            setScanning(true);
+            lastScanTime.current = Date.now();
+            isProcessing.current = false;
+        }, 1500);
+    };
 
     const handleError = useCallback((err) => {
         console.error("QR Reader Error: ", err);
@@ -155,8 +115,7 @@ export default function Punch() {
             }
 
         } catch (error) {
-            console.error("Error handling punch: ", error);
-            toast.error('打卡過程出現錯誤，請向管理員反映！', { autoClose: 2000 });
+            throw error; // 將錯誤拋出，讓 handleScan 處理
         }
     };
 
@@ -180,7 +139,7 @@ export default function Punch() {
         );
     }
 
-    if (!isAuthenticated) {
+    if (!isAuthorized) {
         return (
             <div className="flex min-h-screen flex-col items-center justify-between p-24">
                 <div className="flex flex-col items-center justify-start h-1/3 w-full max-w-5xl font-mono text-sm text-center">
