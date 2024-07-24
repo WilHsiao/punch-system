@@ -43,7 +43,7 @@ export async function POST(req) {
     const ref = db.ref('line_tokens');
     await ref.child(state).set({
       token: accessToken,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' })
     });
 
     console.log('Access Token stored in Firebase');
