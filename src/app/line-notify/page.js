@@ -1,18 +1,17 @@
 import { useEffect } from 'react';
-import { useRouter } from 'next/router';
-import axios from 'axios';
+import { useSearchParams } from 'next/navigation';
 
-export default function PunchSystem() {
-  const router = useRouter();
+export default function LineNotifyCallback() {
+  const searchParams = useSearchParams();
 
   useEffect(() => {
-    const { code, state } = router.query;
+    const code = searchParams.get('code');
+    const state = searchParams.get('state');
 
     if (code && state) {
-      // 發送請求到後端 API 獲取 Access Token
       fetchAccessToken(code, state);
     }
-  }, [router.query]);
+  }, [searchParams]);
 
   const fetchAccessToken = async (code, state) => {
     try {
@@ -26,11 +25,14 @@ export default function PunchSystem() {
 
       if (response.ok) {
         console.log('Access token obtained successfully');
+        // 這裡可以添加成功後的處理邏輯
       } else {
         console.error('Failed to obtain access token');
+        // 這裡可以添加失敗後的處理邏輯
       }
     } catch (error) {
       console.error('Error fetching access token:', error);
+      // 這裡可以添加錯誤處理邏輯
     }
   };
 
