@@ -1,3 +1,5 @@
+// */line-notify
+
 'use client';
 
 import { useState, useEffect, Suspense } from 'react';
@@ -30,13 +32,16 @@ function LineNotifyContent() {
 
       if (response.ok) {
         const data = await response.json();
+        console.log(data.message); // 'Access Token stored successfully'
         setStatus('Authorization successful');
-        // 這裡可以添加更多成功後的邏輯
       } else {
-        setStatus('Failed to obtain access token');
+        const errorData = await response.json();
+        setStatus('Failed to obtain access token: ' + errorData.error);
+        console.error('Failed to obtain or store access token');
       }
     } catch (error) {
       setStatus('Error: ' + error.message);
+      console.error('Error:', error);
     }
   };
 
