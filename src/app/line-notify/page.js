@@ -1,9 +1,11 @@
 'use client';
-import { useEffect } from 'react';
+
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 
-export default function LineNotifyCallback() {
+function LineNotifyContent() {
   const searchParams = useSearchParams();
+  const [status, setStatus] = useState('Processing');
 
   useEffect(() => {
     const code = searchParams.get('code');
@@ -11,6 +13,8 @@ export default function LineNotifyCallback() {
 
     if (code && state) {
       fetchAccessToken(code, state);
+    } else {
+      setStatus('Error: Missing code or state');
     }
   }, [searchParams]);
 
@@ -25,22 +29,29 @@ export default function LineNotifyCallback() {
       });
 
       if (response.ok) {
-        console.log('Access token obtained successfully');
-        // 這裡可以添加成功後的處理邏輯
+        const data = await response.json();
+        setStatus('Authorization successful');
+        // 這裡可以添加更多成功後的邏輯
       } else {
-        console.error('Failed to obtain access token');
-        // 這裡可以添加失敗後的處理邏輯
+        setStatus('Failed to obtain access token');
       }
     } catch (error) {
-      console.error('Error fetching access token:', error);
-      // 這裡可以添加錯誤處理邏輯
+      setStatus('Error: ' + error.message);
     }
   };
 
   return (
     <div>
       <h1>LINE Notify Authorization</h1>
-      <p>Processing...</p>
+      <p>{status}</p>
     </div>
+  );
+}
+
+export default function LineNotifyPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LineNotifyContent />
+    </Suspense>
   );
 }
