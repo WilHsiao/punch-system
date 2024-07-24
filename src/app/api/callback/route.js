@@ -1,16 +1,11 @@
+import { database } from '@/config/firebaseConfig';
+import { ref, push } from 'firebase/database';
 import axios from 'axios';
 
 export async function POST(req) {
+  const { code, state } = await req.json();
+
   try {
-    const { code, state } = await req.json();
-
-    if (!code || !state) {
-      return new Response(JSON.stringify({ error: 'Missing code or state' }), { 
-        status: 400,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
-
     const response = await axios.post('https://notify-bot.line.me/oauth/token', 
       new URLSearchParams({
         grant_type: 'authorization_code',
@@ -26,18 +21,25 @@ export async function POST(req) {
     );
 
     const accessToken = response.data.access_token;
-    
-    console.log('Access Token:', accessToken);
 
-    return new Response(JSON.stringify({ success: true, accessToken }), { 
+    // 存儲 access token 到 Firebase
+    const dbRef = ref(database, 'line_tokens');
+    await push(dbRef, {
+      token: accessToken,
+      createdAt: new Date().toISOString()
+    });
+
+    console.log('Access Token stored in Firebase');
+
+    return new Response(JSON.stringify({ success: true, message: 'Access Token stored successfully' }), { 
       status: 200,
       headers: { 'Content-Type': 'application/json' }
     });
 
   } catch (error) {
-    console.error('Error obtaining access token:', error.response?.data || error.message);
+    console.error('Error obtaining or storing access token:', error.response?.data || error.message);
     return new Response(JSON.stringify({ 
-      error: 'Failed to obtain access token', 
+      error: 'Failed to obtain or store access token', 
       details: error.response?.data || error.message
     }), { 
       status: 500,
