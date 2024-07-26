@@ -40,10 +40,10 @@ export async function POST(req) {
     
     // 存儲 access token 到 Firebase，使用 state 作為 key
     const db = getDatabase();
-    const ref = db.ref('line_tokens');
-    await ref.child(state).set({
+    const ref = db.ref(`line_tokens/${state}`).push();  // 使用 push 方法生成唯一鍵
+    await ref.set({
       token: accessToken,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' })
     });
 
     console.log('Access Token stored in Firebase');
