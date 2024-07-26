@@ -7,8 +7,8 @@ import Navigation from '@/components/navigation';
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "簡易ERP系統",
-  description: "我是簡易ERP系統我是簡易ERP系統我是簡易ERP系統",
+  title: "翰霖ERP系統",
+  description: "我是翰霖ERP系統我是翰霖ERP系統我是翰霖ERP系統",
 };
 
 export default function RootLayout({ children }) {
