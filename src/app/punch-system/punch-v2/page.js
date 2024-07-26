@@ -78,7 +78,7 @@ export default function Punch() {
         }
         // 特殊打卡時間再次確認
         const currentHour = new Date().getHours();
-        if ((currentHour < 9 && currentPunchType === '下班') || (currentHour >= 20 && currentPunchType === '上班')) {
+        if ((currentHour < 10 && currentPunchType === '下班') || (currentHour >= 20 && currentPunchType === '上班')) {
             if (!window.confirm('確定要在這個時間打卡嗎？')) {
                 return;
             }
