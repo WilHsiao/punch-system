@@ -3,7 +3,7 @@
 'use client';
 
 import { createContext, useEffect, useRef, useContext } from 'react';
-import { useAuth } from './auth-context';
+import { useAuth } from '@/context/auth-context';
 
 const EventContext = createContext();
 
