@@ -41,6 +41,8 @@ export default function Punch() {
             console.log("QR Code detected: ", data.text);
             setUid(data.text);
 
+            window.dispatchEvent(new Event('userActivity')); // 觸發自定義的qrcode感應事件
+
             const currentPunchType = localStorage.getItem('punchType') || punchType;
             if (!currentPunchType) {
                 toast.error('請選擇打卡類型！', { autoClose: 2000 });
@@ -151,7 +153,7 @@ export default function Punch() {
     }
 
     return (
-        <IdleRedirectProvider idleTime={5 * 60 * 1000} redirectPath="/punch-system">
+        <IdleRedirectProvider idleTime={1 * 60 * 1000} redirectPath="/punch-system">
             <div className="min-h-screen flex items-center justify-center">
                 <div
                     className="flex flex-col items-center justify-center space-y-6 p-8 bg-white rounded-lg shadow-lg w-full max-w-xl"
