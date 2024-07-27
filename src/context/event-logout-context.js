@@ -1,17 +1,27 @@
-// @/context/event-context
+// @/context/event-logout-context
 
 'use client';
 
-import { createContext, useEffect, useRef } from 'react';
-import { useAuth } from './auth-context';
+import { createContext, useEffect, useRef, useContext } from 'react';
+import { useAuth } from '@/context/auth-context';
 
 const EventContext = createContext();
 
+export const useEvent = () => {
+  const context = useContext(EventContext);
+  if (!context) {
+    throw new Error('useEvent must be used within an EventProvider');
+  }
+  return context;
+};
+
 export const EventProvider = ({ children }) => {
   const { user, logout } = useAuth();
-  let timeoutRef = useRef();
+  const timeoutRef = useRef();
 
   useEffect(() => {
+    const IDLE_TIMEOUT = 60 * 1000; // 1 minute
+
     const resetTimer = () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       timeoutRef.current = setTimeout(() => {
@@ -19,20 +29,20 @@ export const EventProvider = ({ children }) => {
           logout();
           alert('因閒置時間過長，已自動登出。');
         }
-      }, 1 * 60 * 1000);
+      }, IDLE_TIMEOUT);
     };
 
     const events = ['load', 'mousemove', 'mousedown', 'click', 'scroll', 'keypress'];
 
     events.forEach(event => {
-      document.addEventListener(event, resetTimer);
+      window.addEventListener(event, resetTimer);
     });
 
     resetTimer(); // 初始化計時器
 
     return () => {
       events.forEach(event => {
-        document.removeEventListener(event, resetTimer);
+        window.removeEventListener(event, resetTimer);
       });
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };

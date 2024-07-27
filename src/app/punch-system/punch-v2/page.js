@@ -8,6 +8,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import dynamic from 'next/dynamic';
 import { useIamAccess } from '@/hooks/iam-access';
+import { IdleRedirectProvider } from '@/context/redirect-context';
 
 // 動態加載 QrReader 組件，只在客戶端渲染
 const QrReader = dynamic(() => import('react-qr-scanner'), { ssr: false });
@@ -39,6 +40,8 @@ export default function Punch() {
             setScanning(false); // 立即停止掃描，無論是否有選擇打卡類型
             console.log("QR Code detected: ", data.text);
             setUid(data.text);
+
+            window.dispatchEvent(new Event('userActivity')); // 觸發自定義的qrcode感應事件
 
             const currentPunchType = localStorage.getItem('punchType') || punchType;
             if (!currentPunchType) {
@@ -150,7 +153,7 @@ export default function Punch() {
     }
 
     return (
-        <>
+        <IdleRedirectProvider idleTime={1 * 60 * 1000} redirectPath="/punch-system">
             <div className="min-h-screen flex items-center justify-center">
                 <div
                     className="flex flex-col items-center justify-center space-y-6 p-8 bg-white rounded-lg shadow-lg w-full max-w-xl"
@@ -195,6 +198,6 @@ export default function Punch() {
                 </div>
             </div>
             <ToastContainer />
-        </>
+        </IdleRedirectProvider>
     );
 }
