@@ -5,7 +5,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { ref, get } from 'firebase/database';
 import { auth, database } from '@/config/firebaseConfig';
 
-export function useIamAccess(allowedRoles = ['admin'], excludedRoles = []) {
+export function useIamAccess(allowedRoles = ['主管'], excludedRoles = []) {
     // eg. const { isAuthorized, isLoading, userRole } = useIamAccess(['adminC'], ['usersE', 'admin']);
     const [isAuthorized, setIsAuthorized] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
@@ -23,7 +23,7 @@ export function useIamAccess(allowedRoles = ['admin'], excludedRoles = []) {
                     // 檢查授權
                     if (allowedRoles.length === 0 && excludedRoles.length === 0) {
                     // 如果沒有指定任何角色，則只允許 admin
-                    setIsAuthorized(userData.role === 'admin');
+                    setIsAuthorized(userData.role === '主管');
                     } else if (allowedRoles.length > 0) {
                     // 如果指定了允許的角色，則檢查用戶是否在允許列表中
                     setIsAuthorized(allowedRoles.includes(userData.role));

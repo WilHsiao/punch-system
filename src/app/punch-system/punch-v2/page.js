@@ -14,7 +14,7 @@ import { IdleRedirectProvider } from '@/context/redirect-context';
 const QrReader = dynamic(() => import('react-qr-scanner'), { ssr: false });
 
 export default function Punch() {
-    const { isAuthorized, isLoading } = useIamAccess(); // IAM權限控制，目前是預設admin
+    const { isAuthorized, isLoading } = useIamAccess(); // IAM權限控制，目前是預設為“主管”
     const [name, setName] = useState('');
     const [uid, setUid] = useState('');
     const [scanning, setScanning] = useState(true);
