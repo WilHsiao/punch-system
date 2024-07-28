@@ -55,21 +55,29 @@ export default function QueryPunch() {
     };
 
     if (isLoading) {
-        return <div className="flex min-h-screen flex-col items-center justify-center p-24">
-            <h1 className="text-2xl font-bold">載入中...</h1>
-        </div>;
+        return (
+          <div className="flex min-h-screen flex-col items-center justify-between p-24">
+              <div className="flex flex-col items-center justify-start h-1/3 w-full max-w-5xl font-mono text-sm text-center">
+                  <h1 className="text-2xl font-bold">載入中...</h1>
+              </div>
+          </div>
+      );
     }
 
     if (!isAuthorized) {
-        return <div className="flex min-h-screen flex-col items-center justify-center p-24">
-            <h1 className="text-2xl font-bold">管理員須先授權！</h1>
-        </div>;
+        return (
+            <div className="flex min-h-screen flex-col items-center justify-between p-24">
+                <div className="flex flex-col items-center justify-start h-1/3 w-full max-w-5xl font-mono text-sm text-center">
+                    <h1 className="text-2xl font-bold">管理員須先授權！</h1>
+                </div>
+            </div>
+        );
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center">
-            <div className="flex flex-col items-center justify-center space-y-6 p-8 bg-white rounded-lg shadow-lg w-full max-w-xl">
-                <h1 className="text-2xl font-bold text-gray-700">【 查詢打卡記錄 】</h1>
+        <div className="min-h-screen py-10 px-4 flex flex-col items-start justify-start">
+              <div className="w-full max-w-xl mx-auto bg-white rounded-lg shadow-lg p-8">
+                <h1 className="text-2xl font-bold text-gray-700 text-center">【 查詢打卡記錄 】</h1>
                 {scanning ? (
                     <div className="w-full">
                         <QrReader

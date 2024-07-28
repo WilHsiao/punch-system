@@ -19,11 +19,9 @@ export default function PasswordUnlock({ onUnlock }) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="flex flex-col items-center justify-center space-y-6 p-8 bg-white rounded-lg shadow-lg w-full max-w-xl"
-      style={{ marginTop: '-30%' }}
-      >
-        <h1 className="text-2xl font-bold mb-4 text-gray-700">請輸入密碼</h1>
+    <div className="min-h-screen py-10 px-4 flex flex-col items-start justify-start">
+              <div className="w-full max-w-xl mx-auto bg-white rounded-lg shadow-lg p-8">
+        <h1 className="text-2xl font-bold mb-4 text-gray-700 text-center">請輸入密碼</h1>
         <form onSubmit={(e) => { e.preventDefault(); checkAccessPassword(); }} className="w-full flex flex-col items-center space-y-4">
           <input
             type={showPassword ? 'text' : 'password'}

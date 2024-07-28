@@ -52,12 +52,10 @@ export default function Login() {
 
     return (
     	<>
-            <div className="min-h-screen flex items-center justify-center">
-            <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-lg" style={{ marginTop: '-15%' }}>
+        <div className="min-h-screen py-10 px-4 flex flex-col items-start justify-start">
+        <div className="w-full max-w-xl mx-auto bg-white rounded-lg shadow-lg p-8">
               {user ? (
-                <>
-                  <h1 className="text-xl font-bold mb-4 text-gray-700">{user.email} 管理員，已授權！</h1>
-                </>
+                <div className='flex justify-center'><h1 className="text-xl font-bold mb-4 text-gray-700">{user.email} 管理員，已授權！</h1></div>
               ) : (
                 <>
                   <form onSubmit={handleLogin} className="flex flex-col items-center w-full">
