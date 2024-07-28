@@ -7,9 +7,11 @@ import { ref, set, get } from 'firebase/database';
 import { onAuthStateChanged } from 'firebase/auth';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useIamAccess } from '@/hooks/iam-access';
 import PasswordUnlock from '@/hooks/page-pw-unlock';
 
 export default function PunchManual() {
+  const { isAuthorized, isLoading } = useIamAccess();
     const [uid, setUid] = useState('');
     const [name, setName] = useState('');
     const [date, setDate] = useState('');
@@ -64,6 +66,26 @@ export default function PunchManual() {
             toast.error('補打卡過程出現錯誤', { autoClose: 1000 });
         }
     };
+
+    if (isLoading) {
+      return (
+        <div className="flex min-h-screen flex-col items-center justify-between p-24">
+            <div className="flex flex-col items-center justify-start h-1/3 w-full max-w-5xl font-mono text-sm text-center">
+                <h1 className="text-2xl font-bold">載入中...</h1>
+            </div>
+        </div>
+    );
+  }
+
+    if (!isAuthorized) {
+      return (
+          <div className="flex min-h-screen flex-col items-center justify-between p-24">
+              <div className="flex flex-col items-center justify-start h-1/3 w-full max-w-5xl font-mono text-sm text-center">
+                  <h1 className="text-2xl font-bold">管理員須先授權！</h1>
+              </div>
+          </div>
+      );
+  }
 
     if (!unlocked) {
         return <PasswordUnlock onUnlock={() => setUnlocked(true)} />; // 顯示密碼解鎖頁面
