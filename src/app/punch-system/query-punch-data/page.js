@@ -1,3 +1,5 @@
+// */punch-system/query-punch-data
+
 'use client';
 import { useState } from 'react';
 import { database } from '@/config/firebaseConfig';
@@ -101,7 +103,6 @@ export default function QueryPunch() {
                     )}
                     {punches.length > 0 && (
                         <div className="w-full mt-4">
-                            <h2 className="text-xl font-bold text-center text-gray-700 mb-4">打卡記錄</h2>
                             <div className="overflow-x-auto">
                                 <table className="min-w-full bg-white rounded-lg shadow-lg">
                                     <thead>
@@ -112,17 +113,30 @@ export default function QueryPunch() {
                                         </tr>
                                     </thead>
                                     <tbody className="text-gray-700 text-sm font-light">
-                                        {punches.map((punch, index) => (
-                                            <tr
-                                                key={index}
-                                                className={`border-b border-gray-200 hover:bg-gray-100 font-semibold ${punch.type === '上班' ? 'bg-green-100' : 'bg-red-100'
-                                                    }`}
-                                            >
-                                                <td className="py-3 px-6 text-left whitespace-nowrap">{punch.timestamp}</td>
-                                                <td className="py-3 px-6 text-left">{punch.type}</td>
-                                                <td className="py-3 px-6 text-left">{punch.tag}</td>
-                                            </tr>
-                                        ))}
+                                        {punches.map((punch, index) => {
+                                            const prevPunch = index > 0 ? punches[index - 1] : null;
+                                            const isOrderIncorrect = prevPunch && prevPunch.type === punch.type;
+
+                                            return (
+                                                <>
+                                                    {isOrderIncorrect && (
+                                                        <tr className="bg-yellow-100">
+                                                            <td colSpan="3" className="py-2 px-6 text-center text-yellow-700">
+                                                                警告：連續的{punch.type}打卡可能有誤
+                                                            </td>
+                                                        </tr>
+                                                    )}
+                                                    <tr
+                                                        className={`border-b border-gray-200 hover:bg-gray-100 font-semibold ${punch.type === '上班' ? 'bg-green-100' : 'bg-red-100'
+                                                            }`}
+                                                    >
+                                                        <td className="py-3 px-6 text-left whitespace-nowrap">{punch.timestamp}</td>
+                                                        <td className="py-3 px-6 text-left">{punch.type}</td>
+                                                        <td className="py-3 px-6 text-left">{punch.tag}</td>
+                                                    </tr>
+                                                </>
+                                            );
+                                        })}
                                     </tbody>
                                 </table>
                             </div>
