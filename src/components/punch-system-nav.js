@@ -4,7 +4,7 @@
 
 import Link from 'next/link';
 
-export default function PunchSystemNav(){
+export default function PunchSystemNav() {
   return (
     <>
       <nav className="w-full bg-gray-600 py-4">

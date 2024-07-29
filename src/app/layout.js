@@ -16,8 +16,8 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className={inter.className}>
         {/*<AuthProvider><EventProvider>*/}
-          <Navigation />
-          {children}
+        <Navigation />
+        {children}
         {/*</EventProvider></AuthProvider>*/}
         <footer className="w-full flex items-center justify-center py-4 bg-gray-800 text-white text-sm">
           © 2024 Yu

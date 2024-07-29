@@ -4,7 +4,7 @@
 
 import Link from 'next/link';
 
-export default function Navigation(){
+export default function Navigation() {
   return (
     <>
       <nav className="w-full bg-gray-800 py-4">

@@ -134,12 +134,12 @@ export default function Punch() {
 
     if (isLoading) {
         return (
-          <div className="flex min-h-screen flex-col items-center justify-between p-24">
-              <div className="flex flex-col items-center justify-start h-1/3 w-full max-w-5xl font-mono text-sm text-center">
-                  <h1 className="text-2xl font-bold">載入中...</h1>
-              </div>
-          </div>
-      );
+            <div className="flex min-h-screen flex-col items-center justify-between p-24">
+                <div className="flex flex-col items-center justify-start h-1/3 w-full max-w-5xl font-mono text-sm text-center">
+                    <h1 className="text-2xl font-bold">載入中...</h1>
+                </div>
+            </div>
+        );
     }
 
     if (!isAuthorized) {
@@ -153,50 +153,52 @@ export default function Punch() {
     }
 
     return (
-        <IdleRedirectProvider idleTime={1 * 60 * 1000} redirectPath="/punch-system">
-            <div className="min-h-screen py-10 px-4 flex flex-col items-start justify-start">
-            <div className="w-full max-w-xl mx-auto bg-white rounded-lg shadow-lg p-8">
-                    <h1 className="text-2xl font-bold text-gray-700 text-center mb-4">【 打卡機 】</h1>
-                    <div className="mb-3 w-full flex flex-col items-center">
-                        {/* <label className="text-gray-700 font-bold mb-2">
+        <>
+            <IdleRedirectProvider idleTime={1 * 60 * 1000} redirectPath="/punch-system">
+                <div className="min-h-screen py-10 px-4 flex flex-col items-start justify-start">
+                    <div className="w-full max-w-xl mx-auto bg-white rounded-lg shadow-lg p-8">
+                        <h1 className="text-2xl font-bold text-gray-700 text-center mb-4">【 打卡機 】</h1>
+                        <div className="mb-3 w-full flex flex-col items-center">
+                            {/* <label className="text-gray-700 font-bold mb-2">
                             打卡類型: {punchType || '未選擇'}
                         </label> */}
-                        <div className="flex space-x-4">
-                            {['上班', '下班'].map((type) => (
-                                <button
-                                    key={type}
-                                    className={`px-4 py-2 rounded ${punchType === type ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-700'}`}
-                                    onClick={() => handlePunchTypeChange(type)}
-                                >
-                                    {type}
-                                </button>
-                            ))}
+                            <div className="flex space-x-4">
+                                {['上班', '下班'].map((type) => (
+                                    <button
+                                        key={type}
+                                        className={`px-4 py-2 rounded ${punchType === type ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-700'}`}
+                                        onClick={() => handlePunchTypeChange(type)}
+                                    >
+                                        {type}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="flex justify-center items-center w-full">
+                            {scanning && (
+                                <div className="w-full h-full">
+                                    <QrReader
+                                        key={Date.now()} // 強制重新渲染
+                                        delay={300}
+                                        onError={handleError}
+                                        onScan={handleScan}
+                                        style={{ width: '100%', height: '100%' }}
+                                    />
+                                </div>
+                            )}
+                        </div>
+                        <div className="flex justify-center mt-4">
+                            <button
+                                onClick={resetScanner}
+                                className="mt-4 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+                            >
+                                重置掃描器
+                            </button>
                         </div>
                     </div>
-                    <div className="flex justify-center items-center w-full">
-                        {scanning && (
-                            <div className="w-full h-full">
-                                <QrReader
-                                    key={Date.now()} // 強制重新渲染
-                                    delay={300}
-                                    onError={handleError}
-                                    onScan={handleScan}
-                                    style={{ width: '100%', height: '100%' }}
-                                />
-                            </div>
-                        )}
-                    </div>
-                    <div className="flex justify-center mt-4">
-                    <button
-                        onClick={resetScanner}
-                        className="mt-4 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-                    >
-                        重置掃描器
-                    </button>
-                    </div>
                 </div>
-            </div>
-            <ToastContainer />
-        </IdleRedirectProvider>
+                <ToastContainer />
+            </IdleRedirectProvider>
+        </>
     );
 }

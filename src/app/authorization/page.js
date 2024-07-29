@@ -9,91 +9,91 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 export default function Login() {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
-    const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
-            if (user) {
-                setUser(user);
-            } else {
-                setUser(null);
-                setEmail('');
-                setPassword('');
-            }
-            setLoading(false);
-        });
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUser(user);
+      } else {
+        setUser(null);
+        setEmail('');
+        setPassword('');
+      }
+      setLoading(false);
+    });
 
-        return () => {
-            unsubscribe();
-        };
-    }, []);
-
-    const handleLogin = async (e) => {
-        e.preventDefault();
-        setError('');
-        try {
-            await signInWithEmailAndPassword(auth, email, password);
-            toast.success('授權成功！', { autoClose: 1000 });
-        } catch (error) {
-            console.error(error);
-            setError('授權失敗，請填寫正確的電子郵件和密碼。');
-        } finally {
-            setLoading(false);
-        }
+    return () => {
+      unsubscribe();
     };
+  }, []);
 
-    if (loading) {
-        return <div className="flex flex-col items-center justify-center h-1/3 p-24">載入中...</div>;
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError('');
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      toast.success('授權成功！', { autoClose: 1000 });
+    } catch (error) {
+      console.error(error);
+      setError('授權失敗，請填寫正確的電子郵件和密碼。');
+    } finally {
+      setLoading(false);
     }
+  };
 
-    return (
-    	<>
-        <div className="min-h-screen py-10 px-4 flex flex-col items-start justify-start">
+  if (loading) {
+    return <div className="flex flex-col items-center justify-center h-1/3 p-24">載入中...</div>;
+  }
+
+  return (
+    <>
+      <div className="min-h-screen py-10 px-4 flex flex-col items-start justify-start">
         <div className="w-full max-w-xl mx-auto bg-white rounded-lg shadow-lg p-8">
-              {user ? (
-                <div className='flex justify-center'><h1 className="text-xl font-bold mb-4 text-gray-700">{user.email} 管理員，已授權！</h1></div>
-              ) : (
-                <>
-                  <form onSubmit={handleLogin} className="flex flex-col items-center w-full">
-                    <div className="mb-3 w-full flex items-center">
-                          <h2 className="w-1/5 text-left text-gray-700 font-bold pr-4">信箱</h2>
-                          <input
-                            type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            placeholder="請輸入信箱"
-                            className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
-                            autoComplete="email"
-                          />
-                        </div>
-                    <div className="mb-3 w-full flex items-center">
-                          <h2 className="w-1/5 text-left text-gray-700 font-bold pr-4">密碼</h2>
-                          <input
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            placeholder="請輸入密碼"
-                            className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
-                            autoComplete="current-password"
-                          />
-                        </div>
-                    <button
-                      type="submit"
-                      className="mt-4 w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700 transition duration-300"
-                    >
-                      授權
-                    </button>
-                    {error && <p className="text-red-500 mt-2">{error}</p>}
-                  </form>
-                </>
-              )}
-              <ToastContainer />
-            </div>
-          </div>
-        </>
-    );
+          {user ? (
+            <div className='flex justify-center'><h1 className="text-xl font-bold mb-4 text-gray-700">{user.email} 管理員，已授權！</h1></div>
+          ) : (
+            <>
+              <form onSubmit={handleLogin} className="flex flex-col items-center w-full">
+                <div className="mb-3 w-full flex items-center">
+                  <h2 className="w-1/5 text-left text-gray-700 font-bold pr-4">信箱</h2>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="請輸入信箱"
+                    className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
+                    autoComplete="email"
+                  />
+                </div>
+                <div className="mb-3 w-full flex items-center">
+                  <h2 className="w-1/5 text-left text-gray-700 font-bold pr-4">密碼</h2>
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="請輸入密碼"
+                    className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
+                    autoComplete="current-password"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="mt-4 w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700 transition duration-300"
+                >
+                  授權
+                </button>
+                {error && <p className="text-red-500 mt-2">{error}</p>}
+              </form>
+            </>
+          )}
+          <ToastContainer />
+        </div>
+      </div>
+    </>
+  );
 }

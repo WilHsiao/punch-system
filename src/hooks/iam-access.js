@@ -22,26 +22,26 @@ export function useIamAccess(allowedRoles = ['主管'], excludedRoles = []) {
 
                     // 檢查授權
                     if (allowedRoles.length === 0 && excludedRoles.length === 0) {
-                    // 如果沒有指定任何角色，則只允許 admin
-                    setIsAuthorized(userData.role === '主管');
+                        // 如果沒有指定任何角色，則只允許 admin
+                        setIsAuthorized(userData.role === '主管');
                     } else if (allowedRoles.length > 0) {
-                    // 如果指定了允許的角色，則檢查用戶是否在允許列表中
-                    setIsAuthorized(allowedRoles.includes(userData.role));
+                        // 如果指定了允許的角色，則檢查用戶是否在允許列表中
+                        setIsAuthorized(allowedRoles.includes(userData.role));
                     } else {
-                    // 如果只指定了排除的角色，則檢查用戶是否不在排除列表中
-                    setIsAuthorized(!excludedRoles.includes(userData.role));
+                        // 如果只指定了排除的角色，則檢查用戶是否不在排除列表中
+                        setIsAuthorized(!excludedRoles.includes(userData.role));
                     }
                 } else {
-                  setIsAuthorized(false);
+                    setIsAuthorized(false);
                 }
             } else {
                 setIsAuthorized(false);
                 setUserRole(null);
-              }
-              setIsLoading(false);
-            });
+            }
+            setIsLoading(false);
+        });
 
-            return () => unsubscribe();
+        return () => unsubscribe();
     }, [allowedRoles, excludedRoles]);
 
     return { isAuthorized, isLoading, userRole };
