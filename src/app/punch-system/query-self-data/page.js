@@ -58,7 +58,7 @@ export default function QueryPunch() {
                 <div className="w-full max-w-xl mx-auto bg-white rounded-lg shadow-lg p-8">
                     {punches.length === 0 && (
                         <>
-                            <h1 className="text-2xl font-bold text-gray-700 text-center mb-6">【 我的打卡紀錄 】</h1>
+                            <h1 className="text-2xl font-bold text-gray-700 text-center mb-6">【 我的紀錄 】</h1>
                             <button
                                 onClick={handleQuery}
                                 className="bg-blue-500 text-white p-2 rounded w-full font-bold mt-2"
