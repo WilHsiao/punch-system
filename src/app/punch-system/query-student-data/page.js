@@ -1,4 +1,4 @@
-// */punch-system/query-punch-data
+// */punch-system/query-student-data
 
 'use client';
 import { useState } from 'react';
@@ -7,17 +7,18 @@ import { get, ref, query, orderByChild } from 'firebase/database';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import dynamic from 'next/dynamic';
+import { useIamAccess } from '@/hooks/iam-access';
 
 const QrReader = dynamic(() => import('react-qr-scanner'), { ssr: false });
 
 export default function QueryPunch() {
+    const { isAuthorized, isLoading, userRole } = useIamAccess(['主管', '老師'], []);
     const [punches, setPunches] = useState([]);
     const [scanning, setScanning] = useState(true);
     const [lastScanned, setLastScanned] = useState(null);
 
     const handleScan = async (data) => {
         if (data && data !== lastScanned) {
-            console.log(data.text);
             const uid = typeof data === 'object' ? data.text : data;
             setLastScanned(data);
             setScanning(false);
@@ -54,6 +55,26 @@ export default function QueryPunch() {
         console.error(err);
         toast.error('QR碼掃描錯誤', { autoClose: 2000 });
     };
+
+    if (isLoading) {
+        return (
+            <div className="flex min-h-screen flex-col items-center justify-between p-24">
+                <div className="flex flex-col items-center justify-start h-1/3 w-full max-w-5xl font-mono text-sm text-center">
+                    <h1 className="text-2xl font-bold">載入中...</h1>
+                </div>
+            </div>
+        );
+    }
+
+    if (!isAuthorized) {
+        return (
+            <div className="flex min-h-screen flex-col items-center justify-between p-24">
+                <div className="flex flex-col items-center justify-start h-1/3 w-full max-w-5xl font-mono text-sm text-center">
+                    <h1 className="text-2xl font-bold">管理員須先授權！</h1>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <>
