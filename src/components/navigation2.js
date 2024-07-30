@@ -38,12 +38,15 @@ export default function Navigation() {
       <div className={`${isMobile ? 'flex flex-col space-y-2' : 'flex space-x-4 ml-auto items-center'}`}>
         <div className="relative">
           {isMobile ? (
+            <>
             <button
               onClick={togglePunchSystem}
               className="w-full text-xl font-bold bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-700 transition duration-300 text-left"
             >
               打卡系統
             </button>
+            {isPunchSystemOpen && <PunchSystemNavLinks />}
+            </>
           ) : (
             <Link href="/punch-system" legacyBehavior>
               <a className="text-xl font-bold bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-700 transition duration-300">打卡系統</a>
@@ -105,7 +108,7 @@ export default function Navigation() {
           <div className={`${isMobile ? 'flex flex-col space-y-2 mt-16' : 'flex justify-between items-center'}`}>
             <MainNavLinks />
           </div>
-          {isPunchSystemPage && (
+          {!isMobile && isPunchSystemPage && (
             <>
               {isMobile && <div className="border-t border-gray-600"></div>}
               <PunchSystemNavLinks />
