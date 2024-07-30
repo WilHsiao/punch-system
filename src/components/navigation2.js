@@ -1,34 +1,46 @@
 // @/components/navigation.js
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 export default function Navigation() {
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
   const [isPunchSystemOpen, setIsPunchSystemOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const pathname = usePathname();
 
+  const handleResize = useCallback(() => {
+    setIsMobile(window.innerWidth < 768);
+  }, []);
+
   useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
+    setIsMounted(true);
     handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
+  }, [handleResize]);
+
+  const toggleMenu = useCallback(() => {
+    setIsOpen(prev => !prev);
   }, []);
 
-  const toggleMenu = () => {
-    setIsOpen(!isOpen);
-  };
 
-  const togglePunchSystem = () => {
-    setIsPunchSystemOpen(!isPunchSystemOpen);
-  };
+  const togglePunchSystem = useCallback(() => {
+    setIsPunchSystemOpen(prev => !prev);
+  }, []);
 
   const isPunchSystemPage = pathname.startsWith('/punch-system');
+
+  if (!isMounted) {
+    return (
+      <div className="h-16 bg-gray-800">
+        {/* 骨架屏 */}
+      </div>
+    );
+  }
 
   const MainNavLinks = () => (
     <>
@@ -63,31 +75,19 @@ export default function Navigation() {
 
   const PunchSystemNavLinks = () => (
     <div className={`${isMobile ? 'flex flex-col space-y-2 pt-4' : 'flex justify-center space-x-4 pt-4'}`}>
-      <Link href="/punch-system/punch-v2" legacyBehavior>
-        <a className="text-lg font-bold bg-blue-300 text-black px-3 py-1 rounded hover:bg-blue-400 transition duration-300">
-          打卡機
-        </a>
-      </Link>
-      <Link href="/punch-system/punch-manual" legacyBehavior>
-        <a className="text-lg font-bold bg-blue-300 text-black px-3 py-1 rounded hover:bg-blue-400 transition duration-300">
-          補打卡
-        </a>
-      </Link>
-      <Link href="/punch-system/query-punch-data" legacyBehavior>
-        <a className="text-lg font-bold bg-blue-300 text-black px-3 py-1 rounded hover:bg-blue-400 transition duration-300">
-          查詢所有打卡
-        </a>
-      </Link>
-      <Link href="/punch-system/query-student-data" legacyBehavior>
-        <a className="text-lg font-bold bg-blue-300 text-black px-3 py-1 rounded hover:bg-blue-400 transition duration-300">
-          查詢學生報到資料
-        </a>
-      </Link>
-      <Link href="/punch-system/query-self-data" legacyBehavior>
-        <a className="text-lg font-bold bg-blue-300 text-black px-3 py-1 rounded hover:bg-blue-400 transition duration-300">
-          我的紀錄
-        </a>
-      </Link>
+      {[
+        { href: '/punch-system/punch-v2', text: '打卡機' },
+        { href: '/punch-system/punch-manual', text: '補打卡' },
+        { href: '/punch-system/query-punch-data', text: '查詢所有打卡' },
+        { href: '/punch-system/query-student-data', text: '查詢學生報到資料' },
+        { href: '/punch-system/query-self-data', text: '我的紀錄' },
+      ].map(({ href, text }) => (
+        <Link key={href} href={href} legacyBehavior>
+          <a className="text-lg font-bold bg-blue-300 text-black px-3 py-1 rounded hover:bg-blue-400 transition duration-300">
+            {text}
+          </a>
+        </Link>
+      ))}
     </div>
   );
 
@@ -100,7 +100,7 @@ export default function Navigation() {
           </svg>
         </button>
       )}
-      <nav className={`${isMobile ? 'fixed top-0 left-0 h-full w-64 bg-gray-800 transform ' + (isOpen ? 'translate-x-0' : '-translate-x-full') : 'relative bg-gray-800'} transition-transform duration-300 ease-in-out z-40`}>
+      <nav className={`nav-mobile ${isOpen ? 'open' : ''}`}>
         <div className={`${isMobile ? 'px-4 py-4' : 'max-w-7xl mx-auto px-4 py-4'}`}>
           <div className={`${isMobile ? 'flex flex-col space-y-2 mt-16' : 'flex justify-between items-center'}`}>
             <MainNavLinks />
