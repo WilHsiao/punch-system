@@ -2,7 +2,8 @@
 
 import { Inter } from "next/font/google";
 import "./globals.css";
-import Navigation from '@/components/navigation';
+// import Navigation from '@/components/navigation';
+import Navigation2 from '@/components/navigation2';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -16,7 +17,8 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className={inter.className}>
         {/*<AuthProvider><EventProvider>*/}
-        <Navigation />
+        {/* <Navigation /> */}
+        <Navigation2 />
         {children}
         {/*</EventProvider></AuthProvider>*/}
         <footer className="w-full flex items-center justify-center py-4 bg-gray-800 text-white text-sm">
