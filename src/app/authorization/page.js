@@ -1,4 +1,4 @@
-// */login
+// /authorization
 
 'use client';
 
@@ -8,7 +8,7 @@ import { auth } from '@/config/firebaseConfig';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-export default function Login() {
+export default function Auth() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -32,7 +32,7 @@ export default function Login() {
     };
   }, []);
 
-  const handleLogin = async (e) => {
+  const handleAuth = async (e) => {
     e.preventDefault();
     setError('');
     try {
@@ -54,11 +54,12 @@ export default function Login() {
     <>
       <div className="min-h-screen py-10 px-4 flex flex-col items-start justify-start">
         <div className="w-full max-w-xl mx-auto bg-white rounded-lg shadow-lg p-8">
+        <h1 className="text-2xl font-bold text-gray-700 text-center mb-6">【 授權 】</h1>
           {user ? (
-            <div className='flex justify-center'><h1 className="text-xl font-bold mb-4 text-gray-700">{user.email} 管理員，已授權！</h1></div>
+            <div className='flex justify-center'><h1 className="text-xl font-bold mb-4 text-gray-700">{user.email} 已授權！</h1></div>
           ) : (
             <>
-              <form onSubmit={handleLogin} className="flex flex-col items-center w-full">
+              <form onSubmit={handleAuth} className="flex flex-col items-center w-full">
                 <div className="mb-3 w-full flex items-center">
                   <h2 className="w-1/5 text-left text-gray-700 font-bold pr-4">信箱</h2>
                   <input
