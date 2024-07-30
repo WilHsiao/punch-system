@@ -10,9 +10,6 @@ export default function PunchSystemLayout({ children }) {
     <>
       <div className="min-h-screen flex flex-col">
         <header className="bg-gray-100 py-2">
-          <h1 className="max-w-5xl mx-auto text-lg text-gray-600 flex items-center px-4">
-            ERP系統&nbsp;&nbsp;▻&nbsp;&nbsp;打卡系統
-          </h1>
         </header>
         <main className="flex-grow py-8">
           <div className="max-w-5xl mx-auto px-4">
