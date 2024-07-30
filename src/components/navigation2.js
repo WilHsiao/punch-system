@@ -8,6 +8,7 @@ import { usePathname } from 'next/navigation';
 export default function Navigation() {
   const [isMobile, setIsMobile] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [isPunchSystemOpen, setIsPunchSystemOpen] = useState(false);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -23,6 +24,10 @@ export default function Navigation() {
     setIsOpen(!isOpen);
   };
 
+  const togglePunchSystem = () => {
+    setIsPunchSystemOpen(!isPunchSystemOpen);
+  };
+
   const isPunchSystemPage = pathname.startsWith('/punch-system');
 
   const MainNavLinks = () => (
@@ -30,10 +35,22 @@ export default function Navigation() {
       <Link href="/" legacyBehavior>
         <a className="text-xl font-bold bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-700 transition duration-300">首頁</a>
       </Link>
-      <div className="flex space-x-4 ml-auto">
-        <Link href="/punch-system" legacyBehavior>
-          <a className="text-xl font-bold bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-700 transition duration-300">打卡系統</a>
-        </Link>
+      <div className={`${isMobile ? 'flex flex-col space-y-2' : 'flex space-x-4 ml-auto items-center'}`}>
+        <div className="relative">
+          {isMobile ? (
+            <button
+              onClick={togglePunchSystem}
+              className="w-full text-xl font-bold bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-700 transition duration-300 text-left"
+            >
+              打卡系統
+            </button>
+          ) : (
+            <Link href="/punch-system" legacyBehavior>
+              <a className="text-xl font-bold bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-700 transition duration-300">打卡系統</a>
+            </Link>
+          )}
+          {isMobile && isPunchSystemOpen && <PunchSystemNavLinks />}
+        </div>
         <Link href="/authorization" legacyBehavior>
           <a className="text-xl font-bold bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-700 transition duration-300">授權</a>
         </Link>
@@ -45,7 +62,7 @@ export default function Navigation() {
   );
 
   const PunchSystemNavLinks = () => (
-    <>
+    <div className={`${isMobile ? 'flex flex-col space-y-2 pt-4' : 'flex justify-center space-x-4 pt-4'}`}>
       <Link href="/punch-system/punch-v2" legacyBehavior>
         <a className="text-lg font-bold bg-blue-300 text-black px-3 py-1 rounded hover:bg-blue-400 transition duration-300">
           打卡機
@@ -71,44 +88,31 @@ export default function Navigation() {
           我的紀錄
         </a>
       </Link>
-    </>
+    </div>
   );
 
   return (
-    <nav className={`fixed py-4 top-0 left-0 h-full bg-gray-800 transform ${isMobile && isOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out md:relative md:translate-x-0`}>
-      <div className="max-w-7xl mx-auto px-4">
-        {isMobile ? (
-          <div>
-            <button onClick={toggleMenu} className="text-white mt-4 ml-4">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
-            {isOpen && (
-              <div className="mt-4 flex flex-col space-y-2">
-                <MainNavLinks />
-                {isPunchSystemPage && (
-                  <>
-                    <div className="border-t border-gray-600 my-2"></div>
-                    <PunchSystemNavLinks />
-                  </>
-                )}
-              </div>
-            )}
+    <>
+      {isMobile && (
+        <button onClick={toggleMenu} className="fixed top-4 left-4 z-50 text-white bg-blue-500 p-2 rounded">
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+      )}
+      <nav className={`${isMobile ? 'fixed top-0 left-0 h-full w-64 bg-gray-800 transform ' + (isOpen ? 'translate-x-0' : '-translate-x-full') : 'relative bg-gray-800'} transition-transform duration-300 ease-in-out z-40`}>
+        <div className={`${isMobile ? 'px-4 py-4' : 'max-w-7xl mx-auto px-4 py-4'}`}>
+          <div className={`${isMobile ? 'flex flex-col space-y-2 mt-16' : 'flex justify-between items-center'}`}>
+            <MainNavLinks />
           </div>
-        ) : (
-          <div>
-            <div className="flex justify-between items-center px-10">
-              <MainNavLinks />
-            </div>
-            {isPunchSystemPage && (
-              <div className="mt-4 flex justify-center space-x-4">
-                <PunchSystemNavLinks />
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-    </nav>
+          {isPunchSystemPage && (
+            <>
+              {isMobile && <div className="border-t border-gray-600"></div>}
+              <PunchSystemNavLinks />
+            </>
+          )}
+        </div>
+      </nav>
+    </>
   );
 }
