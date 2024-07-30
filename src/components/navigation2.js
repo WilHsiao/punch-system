@@ -64,7 +64,7 @@ export default function Navigation() {
           {isMobile && isPunchSystemOpen && <PunchSystemNavLinks />}
         </div>
         <Link href="/authorization" legacyBehavior>
-          <a className="text-xl font-bold bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-700 transition duration-300">授權</a>
+          <a className="text-xl font-bold bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-700 transition duration-300">打卡機授權</a>
         </Link>
         <Link href="/login" legacyBehavior>
           <a className="text-xl font-bold bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-700 transition duration-300">登入／登出</a>
