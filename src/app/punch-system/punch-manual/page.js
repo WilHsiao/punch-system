@@ -8,7 +8,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useIamAccess } from '@/hooks/iam-access';
-import PasswordUnlock from '@/hooks/page-pw-unlock';
+// import PasswordUnlock from '@/hooks/page-pw-unlock';
 
 export default function PunchManual() {
   const { isAuthorized, isLoading } = useIamAccess();
@@ -87,9 +87,9 @@ export default function PunchManual() {
     );
   }
 
-  if (!unlocked) {
-    return <PasswordUnlock onUnlock={() => setUnlocked(true)} />; // 顯示密碼解鎖頁面
-  }
+  // if (!unlocked) {
+  //   return <PasswordUnlock onUnlock={() => setUnlocked(true)} />; // 顯示密碼解鎖頁面
+  // }
 
   return (
     <>
