@@ -93,8 +93,8 @@ export default function PunchManual() {
 
   return (
     <>
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="flex flex-col items-center justify-center space-y-6 p-8 bg-white rounded-lg shadow-lg w-full max-w-xl mt-[-30%]">
+      <div className="min-h-screen py-10 px-4 flex flex-col items-start justify-start">
+        <div className="w-full max-w-xl mx-auto bg-white rounded-lg shadow-lg p-8">
           <h1 className="text-2xl font-bold text-gray-700">【 補打卡 】</h1>
           {[
             { label: 'UID', type: 'text', value: uid, onChange: setUid, placeholder: '請輸入用戶 UID' },
