@@ -95,7 +95,7 @@ export default function PunchManual() {
     <>
       <div className="min-h-screen py-10 px-4 flex flex-col items-start justify-start">
         <div className="w-full max-w-xl mx-auto bg-white rounded-lg shadow-lg p-8">
-          <h1 className="text-2xl font-bold text-gray-700">【 補打卡 】</h1>
+          <h1 className="text-2xl font-bold text-gray-700 text-center pb-3">【 補打卡 】</h1>
           {[
             { label: 'UID', type: 'text', value: uid, onChange: setUid, placeholder: '請輸入用戶 UID' },
             { label: '日期', type: 'date', value: date, onChange: setDate },
@@ -128,7 +128,7 @@ export default function PunchManual() {
           </div>
           <button
             onClick={handleManualPunch}
-            className="w-3/5 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700 transition duration-300"
+            className="bg-blue-500 text-white p-2 rounded w-full font-bold mt-2"
           >
             提交補打卡
           </button>

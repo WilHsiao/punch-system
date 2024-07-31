@@ -16,6 +16,7 @@ export default function QueryPunch() {
     const [punches, setPunches] = useState([]);
     const [scanning, setScanning] = useState(true);
     const [lastScanned, setLastScanned] = useState(null);
+    const [inputUid, setInputUid] = useState('');
 
     const handleScan = async (data) => {
         if (data && data !== lastScanned) {
@@ -29,22 +30,22 @@ export default function QueryPunch() {
     const queryPunches = async (uid) => {
         try {
             // 首先檢查被查詢的用戶是否為學生
-        const userRef = ref(database, `users/${uid}`);
-        const userSnapshot = await get(userRef);
+            const userRef = ref(database, `users/${uid}`);
+            const userSnapshot = await get(userRef);
 
-        if (!userSnapshot.exists()) {
-            toast.error('找不到該用戶！', { autoClose: 2000 });
-            setPunches([]);
-            return;
-        }
+            if (!userSnapshot.exists()) {
+                toast.error('找不到該用戶！', { autoClose: 2000 });
+                setPunches([]);
+                return;
+            }
 
-        const userData = userSnapshot.val();
-        if (userData.role !== '學生') {
-            toast.error('只能查詢學生的打卡記錄！', { autoClose: 2000 });
-            setPunches([]);
-            return;
-        }
-        
+            const userData = userSnapshot.val();
+            if (userData.role !== '學生') {
+                toast.error('只能查詢學生的打卡記錄！', { autoClose: 2000 });
+                setPunches([]);
+                return;
+            }
+
             // 如果是學生，則繼續查詢打卡記錄
             const punchesQuery = query(
                 ref(database, `punches/${uid}`),
@@ -74,6 +75,20 @@ export default function QueryPunch() {
         toast.error('QR碼掃描錯誤', { autoClose: 2000 });
     };
 
+    const handleInputChange = (e) => {
+        setInputUid(e.target.value);
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        if (inputUid.trim()) {
+            setScanning(false);
+            queryPunches(inputUid.trim());
+        } else {
+            toast.error('請輸入有效的 UID', { autoClose: 2000 });
+        }
+    };
+
     if (isLoading) {
         return (
             <div className="flex min-h-screen flex-col items-center justify-between p-24">
@@ -99,6 +114,27 @@ export default function QueryPunch() {
             <div className="min-h-screen py-10 px-4 flex flex-col items-start justify-start">
                 <div className="w-full max-w-xl mx-auto bg-white rounded-lg shadow-lg p-8">
                     <h1 className="text-2xl font-bold text-gray-700 text-center mb-4">【 查詢學生報到記錄 】</h1>
+
+                    {/* UID 輸入區塊 */}
+                    <form onSubmit={handleSubmit} className="mb-4">
+                        <div className="flex items-center">
+                            <input
+                                type="text"
+                                value={inputUid}
+                                onChange={handleInputChange}
+                                placeholder="輸入 UID"
+                                className="flex-grow p-2 border rounded-l"
+                            />
+                            <button
+                                type="submit"
+                                className="bg-blue-500 text-white p-2 rounded-r"
+                            >
+                                查詢
+                            </button>
+                        </div>
+                    </form>
+
+                    {/* QrCode 輸入區塊 */}
                     {scanning ? (
                         <div className="w-full">
                             <QrReader
@@ -113,6 +149,7 @@ export default function QueryPunch() {
                             onClick={() => {
                                 setScanning(true);
                                 setLastScanned(null);
+                                setInputUid('');
                             }}
                             className="bg-green-500 text-white p-2 rounded w-full font-bold mt-2"
                         >
