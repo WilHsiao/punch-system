@@ -28,6 +28,24 @@ export default function QueryPunch() {
 
     const queryPunches = async (uid) => {
         try {
+            // 首先檢查被查詢的用戶是否為學生
+        const userRef = ref(database, `users/${uid}`);
+        const userSnapshot = await get(userRef);
+
+        if (!userSnapshot.exists()) {
+            toast.error('找不到該用戶！', { autoClose: 2000 });
+            setPunches([]);
+            return;
+        }
+
+        const userData = userSnapshot.val();
+        if (userData.role !== '學生') {
+            toast.error('只能查詢學生的打卡記錄！', { autoClose: 2000 });
+            setPunches([]);
+            return;
+        }
+        
+            // 如果是學生，則繼續查詢打卡記錄
             const punchesQuery = query(
                 ref(database, `punches/${uid}`),
                 orderByChild('timestamp'),
