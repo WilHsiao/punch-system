@@ -48,6 +48,9 @@ export default function Navigation() {
         <a className="text-xl font-bold bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-700 transition duration-300">首頁</a>
       </Link>
       <div className={`${isMobile ? 'flex flex-col space-y-2' : 'flex space-x-4 ml-auto items-center'}`}>
+        <Link href="/authorization" legacyBehavior>
+          <a className="text-xl font-bold bg-green-500 text-white px-3 py-2 rounded hover:bg-blue-700 transition duration-300">打卡機授權</a>
+        </Link>
         <div className="relative">
           {isMobile ? (
             <button
@@ -63,9 +66,6 @@ export default function Navigation() {
           )}
           {isMobile && isPunchSystemOpen && <PunchSystemNavLinks />}
         </div>
-        <Link href="/authorization" legacyBehavior>
-          <a className="text-xl font-bold bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-700 transition duration-300">打卡機授權</a>
-        </Link>
         <Link href="/login" legacyBehavior>
           <a className="text-xl font-bold bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-700 transition duration-300">登入／登出</a>
         </Link>
@@ -78,7 +78,7 @@ export default function Navigation() {
       {[
         { href: '/punch-system/punch-v2', text: '打卡機' },
         { href: '/punch-system/punch-manual', text: '補打卡' },
-        { href: '/punch-system/query-punch-data', text: '查詢所有打卡' },
+        { href: '/punch-system/query-punch-data', text: '查詢所有打卡資料' },
         { href: '/punch-system/query-student-data', text: '查詢學生報到資料' },
         { href: '/punch-system/query-self-data', text: '我的紀錄' },
       ].map(({ href, text }) => (
