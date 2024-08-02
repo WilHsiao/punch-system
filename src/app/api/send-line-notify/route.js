@@ -5,7 +5,11 @@ export async function POST(request) {
     console.log('開始處理請求');
     const { message, token } = await request.json();
     console.log('收到的消息:', message);
-    console.log('Token 長度:', token.length);
+    console.log('Token 的前幾個字符:', token ? token.substring(0, 5) + '...' : 'undefined');
+
+    if (!token) {
+      throw new Error('未提供 Line Notify token');
+    }
 
     const response = await fetch('https://notify-api.line.me/api/notify', {
       method: 'POST',

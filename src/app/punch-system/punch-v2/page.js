@@ -20,9 +20,24 @@ const sendLineNotify = async (uid, name, punchType) => {
 
         if (tokenSnapshot.exists()) {
             const tokenData = tokenSnapshot.val();
-            const token = tokenData.token;
+            console.log('Token 數據:', tokenData);
+
+            // 獲取第一個子節點的鍵（在這個例子中是 O3GsH-JMPUg-0M8gVpB）
+            const firstChildKey = Object.keys(tokenData)[0];
+
+            if (!firstChildKey) {
+                throw new Error('未找到 Line Notify token 數據');
+            }
+            const token = tokenData[firstChildKey].token;
+
+            if (!token) {
+                throw new Error('未找到有效的 Line Notify token');
+            }
 
             const message = `${name}已於${new Date().toLocaleString()}${punchType}打卡`;
+
+            console.log('準備發送的消息:', message);
+            console.log('使用的 token 的前幾個字符:', token.substring(0, 5) + '...'); // 只顯示 token 的一部分
 
             const response = await fetch('/api/send-line-notify', {
                 method: 'POST',
@@ -33,12 +48,14 @@ const sendLineNotify = async (uid, name, punchType) => {
             });
 
             if (!response.ok) {
-                throw new Error('發送 Line Notify 失敗');
+                const errorData = await response.json();
+                throw new Error(errorData.error || '發送 Line Notify 失敗');
             }
 
             console.log('Line Notify 發送成功');
         } else {
             console.log('找不到該用戶的 Line token');
+            throw new Error('找不到該用戶的 Line token');
         }
     } catch (error) {
         console.error('發送 Line Notify 時出錯:', error);
