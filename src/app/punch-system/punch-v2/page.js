@@ -13,6 +13,39 @@ import { IdleRedirectProvider } from '@/context/redirect-context';
 // 動態加載 QrReader 組件，只在客戶端渲染
 const QrReader = dynamic(() => import('react-qr-scanner'), { ssr: false });
 
+const sendLineNotify = async (uid, name, punchType) => {
+    try {
+        const tokenRef = ref(database, `line_tokens/${uid}`);
+        const tokenSnapshot = await get(tokenRef);
+
+        if (tokenSnapshot.exists()) {
+            const tokenData = tokenSnapshot.val();
+            const token = tokenData.token;
+
+            const message = `${name}已於${new Date().toLocaleString()}${punchType}打卡`;
+
+            const response = await fetch('https://notify-api.line.me/api/notify', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: `message=${encodeURIComponent(message)}`
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to send Line Notify');
+            }
+
+            console.log('Line Notify sent successfully');
+        } else {
+            console.log('No Line token found for this user');
+        }
+    } catch (error) {
+        console.error('Error sending Line Notify:', error);
+    }
+};
+
 export default function Punch() {
     const { isAuthorized, isLoading, userRole } = useIamAccess(['打卡機'], []);
     const [name, setName] = useState('');
@@ -112,6 +145,9 @@ export default function Punch() {
                 await set(punchRef, punchData);
                 console.log("Punch recorded successfully.");
                 toast.success(`${userData.name} 打卡成功！`, { autoClose: 2000 });
+
+                // 發送 Line Notify
+                await sendLineNotify(uid, userData.name, currentPunchType);
 
             } else {
                 toast.error('用戶不存在！', { autoClose: 2000 });
