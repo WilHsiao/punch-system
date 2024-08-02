@@ -22,7 +22,6 @@ const sendLineNotify = async (uid, name, punchType) => {
             const tokenData = tokenSnapshot.val();
             console.log('Token 數據:', tokenData);
 
-            // 獲取第一個子節點的鍵（在這個例子中是 O3GsH-JMPUg-0M8gVpB）
             const firstChildKey = Object.keys(tokenData)[0];
 
             if (!firstChildKey) {
