@@ -24,25 +24,24 @@ const sendLineNotify = async (uid, name, punchType) => {
 
             const message = `${name}已於${new Date().toLocaleString()}${punchType}打卡`;
 
-            const response = await fetch('https://notify-api.line.me/api/notify', {
+            const response = await fetch('/api/send-line-notify', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'Authorization': `Bearer ${token}`
+                    'Content-Type': 'application/json',
                 },
-                body: `message=${encodeURIComponent(message)}`
+                body: JSON.stringify({ message, token })
             });
 
             if (!response.ok) {
-                throw new Error('Failed to send Line Notify');
+                throw new Error('發送 Line Notify 失敗');
             }
 
-            console.log('Line Notify sent successfully');
+            console.log('Line Notify 發送成功');
         } else {
-            console.log('No Line token found for this user');
+            console.log('找不到該用戶的 Line token');
         }
     } catch (error) {
-        console.error('Error sending Line Notify:', error);
+        console.error('發送 Line Notify 時出錯:', error);
     }
 };
 
