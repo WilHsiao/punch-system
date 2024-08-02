@@ -22,36 +22,39 @@ const sendLineNotify = async (uid, name, punchType) => {
             const tokenData = tokenSnapshot.val();
             console.log('Token 數據:', tokenData);
 
-            const firstChildKey = Object.keys(tokenData)[0];
+            const tokenKeys = Object.keys(tokenData);
 
-            if (!firstChildKey) {
+            if (tokenKeys.length === 0) {
                 throw new Error('未找到 Line Notify token 數據');
-            }
-            const token = tokenData[firstChildKey].token;
-
-            if (!token) {
-                throw new Error('未找到有效的 Line Notify token');
             }
 
             const message = `${name}已於${new Date().toLocaleString()}${punchType}打卡`;
 
             console.log('準備發送的消息:', message);
-            console.log('使用的 token 的前幾個字符:', token.substring(0, 5) + '...'); // 只顯示 token 的一部分
 
-            const response = await fetch('/api/send-line-notify', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ message, token })
-            });
+            // 遍歷所有的 token 並發送通知
+            for (const key of tokenKeys) {
+                const token = tokenData[key].token;
+                if (!token) {
+                    console.log(`未找到有效的 Line Notify token for key ${key}`);
+                    continue;
+                }
+                console.log('使用的 token 的前幾個字符:', token.substring(0, 5) + '...');
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || '發送 Line Notify 失敗');
+                const response = await fetch('/api/send-line-notify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message, token })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || '發送 Line Notify 失敗');
+                }
+                console.log(`Line Notify 發送成功 for token key ${key}`);
             }
-
-            console.log('Line Notify 發送成功');
         } else {
             console.log('找不到該用戶的 Line token');
             throw new Error('找不到該用戶的 Line token');
