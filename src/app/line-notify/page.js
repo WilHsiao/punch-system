@@ -48,7 +48,15 @@ function LineNotifyContent() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-between p-24">
       <div className="flex flex-col items-center justify-start h-1/3 w-full max-w-5xl font-mono text-sm text-center">
-        <h1 className="text-2xl font-bold">Line Notify 授權成功！</h1>
+        <h1 className="text-2xl font-bold">
+          {status === 'Processing' && 'Processing Line Notify Authorization...'}
+          {status === 'Authorization successful' && 'Line Notify 授權成功！'}
+          {status.startsWith('Error:') && 'Line Notify 授權失敗'}
+          {status.startsWith('Failed') && 'Line Notify 授權失敗'}
+        </h1>
+        {(status.startsWith('Error:') || status.startsWith('Failed')) && (
+          <p className="mt-4 text-red-500">{status}</p>
+        )}
       </div>
     </div>
   );
