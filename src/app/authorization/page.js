@@ -1,9 +1,8 @@
 // /authorization
-
 'use client';
 
 import { useState, useEffect } from 'react';
-import { signInWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth';
+import { signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'firebase/auth';
 import { ref, get } from 'firebase/database';
 import { auth, database } from '@/config/firebaseConfig';
 import { ToastContainer, toast } from 'react-toastify';
@@ -28,9 +27,11 @@ export default function Auth() {
           const userData = snapshot.val();
           if (userData.role === '打卡機') {
             setAuthorized(true);
+            toast.success('授權成功！', { autoClose: 1000 });
           } else {
             setAuthorized(false);
-            toast.error('您沒有授權訪問此頁面');
+            toast.error('無法授權！', { autoClose: 1000 });
+            await signOut(auth);  // 如果不是打卡機角色，立即登出
           }
         }
       } else {
@@ -48,19 +49,21 @@ export default function Auth() {
   const handleAuth = async (e) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      toast.success('授權成功！', { autoClose: 1000 });
+      // 登入成功後，角色檢查會在 useEffect 中進行
     } catch (error) {
       console.error(error);
       setError('授權失敗，請填寫正確的電子郵件和密碼。');
+      toast.error('授權失敗，請檢查您的信箱和密碼。', { autoClose: 1000 });
     } finally {
       setLoading(false);
     }
   };
 
   if (loading) {
-    return (
+    return(
       <div className="flex min-h-screen flex-col items-center justify-between p-24">
         <div className="flex flex-col items-center justify-start h-1/3 w-full max-w-5xl font-mono text-sm text-center">
           <h1 className="text-2xl font-bold">載入中...</h1>
