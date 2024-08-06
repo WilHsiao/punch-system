@@ -84,6 +84,7 @@ export default function QueryPunch() {
         if (inputUid.trim()) {
             setScanning(false);
             queryPunches(inputUid.trim());
+            setInputUid('');
         } else {
             toast.error('請輸入有效的 UID', { autoClose: 2000 });
         }

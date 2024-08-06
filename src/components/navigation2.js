@@ -81,6 +81,7 @@ export default function Navigation() {
         { href: '/punch-system/query-punch-data', text: '查詢所有打卡資料' },
         { href: '/punch-system/query-student-data', text: '查詢學生報到資料' },
         { href: '/punch-system/query-self-data', text: '我的紀錄' },
+        { href: '/punch-system/attendance', text: '分部人員狀況' },
       ].map(({ href, text }) => (
         <Link key={href} href={href} legacyBehavior>
           <a className="text-lg font-bold bg-blue-300 text-black px-3 py-1 rounded hover:bg-blue-400 transition duration-300">

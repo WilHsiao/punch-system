@@ -13,6 +13,57 @@ import { IdleRedirectProvider } from '@/context/redirect-context';
 // 動態加載 QrReader 組件，只在客戶端渲染
 const QrReader = dynamic(() => import('react-qr-scanner'), { ssr: false });
 
+const sendLineNotify = async (uid, name, punchType) => {
+    try {
+        const tokenRef = ref(database, `line_tokens/${uid}`);
+        const tokenSnapshot = await get(tokenRef);
+
+        if (tokenSnapshot.exists()) {
+            const tokenData = tokenSnapshot.val();
+            console.log('Token 數據:', tokenData);
+
+            const tokenKeys = Object.keys(tokenData);
+
+            if (tokenKeys.length === 0) {
+                throw new Error('未找到 Line Notify token 數據');
+            }
+
+            const message = `${name}已於${new Date().toLocaleString()}${punchType}打卡`;
+
+            console.log('準備發送的消息:', message);
+
+            // 遍歷所有的 token 並發送通知
+            for (const key of tokenKeys) {
+                const token = tokenData[key].token;
+                if (!token) {
+                    console.log(`未找到有效的 Line Notify token for key ${key}`);
+                    continue;
+                }
+                console.log('使用的 token 的前幾個字符:', token.substring(0, 5) + '...');
+
+                const response = await fetch('/api/send-line-notify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message, token })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || '發送 Line Notify 失敗');
+                }
+                console.log(`Line Notify 發送成功 for token key ${key}`);
+            }
+        } else {
+            console.log('找不到該用戶的 Line token');
+            throw new Error('找不到該用戶的 Line token');
+        }
+    } catch (error) {
+        console.error('發送 Line Notify 時出錯:', error);
+    }
+};
+
 export default function Punch() {
     const { isAuthorized, isLoading, userRole } = useIamAccess(['打卡機'], []);
     const [name, setName] = useState('');
@@ -112,6 +163,9 @@ export default function Punch() {
                 await set(punchRef, punchData);
                 console.log("Punch recorded successfully.");
                 toast.success(`${userData.name} 打卡成功！`, { autoClose: 2000 });
+
+                // 發送 Line Notify
+                await sendLineNotify(uid, userData.name, currentPunchType);
 
             } else {
                 toast.error('用戶不存在！', { autoClose: 2000 });
