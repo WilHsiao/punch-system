@@ -2,26 +2,22 @@
 
 import { Inter } from "next/font/google";
 import "./globals.css";
-import Navigation2 from '@/components/navigation2';
+import ClientRootLayout from './ClientRootLayout';
 
 const inter = Inter({ subsets: ["latin"] });
 
+// 服務器組件，用於定義 metadata
 export const metadata = {
   title: "翰霖ERP系統",
   description: "我是翰霖ERP系統我是翰霖ERP系統我是翰霖ERP系統",
 };
 
+// 服務器組件的 RootLayout
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={inter.className}>
-        {/*<AuthProvider><EventProvider>*/}
-          <Navigation2 />
-          {children}
-        {/*</EventProvider></AuthProvider>*/}
-        <footer className="w-full flex items-center justify-center py-4 bg-gray-800 text-white text-sm">
-          © 2024 Yu
-        </footer>
+        <ClientRootLayout>{children}</ClientRootLayout>
       </body>
     </html>
   );
