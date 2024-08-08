@@ -91,7 +91,7 @@ export default function Navigation() {
       return null;
     }
 
-    const filteredLinks = allPunchSystemLinks.filter(link => 
+    const filteredLinks = allPunchSystemLinks.filter(link =>
       link.requiredRoles.includes(userRole) || userRole === '主管'
     );
 
