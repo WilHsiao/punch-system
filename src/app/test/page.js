@@ -83,7 +83,13 @@ export default function TasksPage() {
       }, []);
 
       if (loading) {
-            return <div className="container mx-auto px-4 py-8">Loading...</div>;
+            return (
+                  <div className="flex min-h-screen flex-col items-center justify-between p-24">
+                        <div className="flex flex-col items-center justify-start h-1/3 w-full max-w-5xl font-mono text-sm text-center">
+                              <h1 className="text-2xl font-bold">載入中...</h1>
+                        </div>
+                  </div>
+            );
       }
 
       if (!userDept) {
