@@ -82,6 +82,9 @@ export default function Navigation() {
         <Link href="/login" legacyBehavior>
           <a className="text-xl font-bold bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-700 transition duration-300">登入／登出</a>
         </Link>
+        <Link href="/tasks" legacyBehavior>
+          <a className="text-xl font-bold bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-700 transition duration-300">分部需求表</a>
+        </Link>
       </div>
     </>
   );
