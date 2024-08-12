@@ -6,16 +6,16 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { database } from '@/config/firebaseConfig';
 
 const taskProperties = [
-      { key: 'category', label: '分類', type: 'text', editable: false },
-      { key: 'main', label: '教材名', type: 'text', editable: false },
-      { key: 'tag', label: '版本', type: 'text', editable: false },
-      { key: 'form', label: '教用/學用', type: 'text', editable: false },
-      { key: 'number', label: '數量', type: 'number', editable: true },
-      { key: 'deadline', label: '最後期限', type: 'date', editable: true },
-      { key: 'additional', label: '備註', type: 'textarea', editable: false },
-      { key: 'state', label: '目前狀態', type: 'text', editable: false },
-      { key: 'quest-time', label: '提出時間', type: 'text', editable: false },
-      { key: 'update-time', label: '最後更新', type: 'text', editable: false },
+      { key: 'category', label: '分類' },
+      { key: 'main', label: '教材名' },
+      { key: 'tag', label: '版本' },
+      { key: 'form', label: '教用/學用' },
+      { key: 'number', label: '數量' },
+      { key: 'deadline', label: '最後期限' },
+      { key: 'additional', label: '備註' },
+      { key: 'state', label: '目前狀態' },
+      { key: 'quest-time', label: '提出時間' },
+      { key: 'update-time', label: '最後更新' },
 ];
 
 const TaskEditForm = ({ task, onSave, onCancel }) => {

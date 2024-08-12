@@ -1,4 +1,3 @@
-// 查看目前資料
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -6,48 +5,42 @@ import { ref, onValue } from 'firebase/database';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { database } from '@/config/firebaseConfig';
 
-// 定義任務屬性及其顯示名稱
 const taskProperties = [
-      { key: 'quest-time', label: '提出時間' },
       { key: 'category', label: '分類' },
       { key: 'main', label: '教材名' },
       { key: 'tag', label: '版本' },
       { key: 'form', label: '教用/學用' },
       { key: 'number', label: '數量' },
-      { key: 'deadline', label: 'Deadline' },
+      { key: 'deadline', label: '最後期限' },
       { key: 'additional', label: '備註' },
-      { key: 'state', label: '目前狀態' },
-      { key: 'update-time', label: '最後更新' }
+      { key: 'quest-time', label: '提出時間' },
+      { key: 'update-time', label: '最後更新' },
 ];
 
-// 任務詳情行組件
-const TaskDetailRow = ({ label, value, isEven }) => (
-      <tr className={isEven ? 'bg-gray-100' : ''}>
-            <td className="py-2 px-3 font-semibold">{label}</td>
-            <td className="py-2 px-3">{value}</td>
-      </tr>
-);
+const statusColors = {
+      '收到訂單': 'bg-blue-500',
+      '向分部確認中': 'bg-yellow-500',
+      '製作中': 'bg-orange-500',
+      '已向廠商訂購': 'bg-purple-500',
+      '等待寄件': 'bg-indigo-500',
+      '寄送中': 'bg-green-500',
+      '等待取件': 'bg-teal-500',
+      '取件完成': 'bg-gray-500',
+};
 
-// 任務卡片組件
-const TaskCard = ({ task }) => (
-      <li className="bg-gray-50 p-4 rounded-lg">
-            <h3 className="font-medium text-lg mb-3">{task.main}</h3>
-            <table className="w-full text-sm">
-                  <tbody>
-                        {taskProperties.map((prop, index) => (
-                              <TaskDetailRow
-                                    key={prop.key}
-                                    label={prop.label}
-                                    value={task[prop.key]}
-                                    isEven={index % 2 === 0}
-                              />
-                        ))}
-                  </tbody>
-            </table>
-      </li>
-);
+const StatusButton = ({ status }) => {
+      const colorClass = statusColors[status] || 'bg-gray-500';
+      return (
+            <button
+                  className={`${colorClass} text-white font-bold py-2 px-4 rounded-full`}
+                  disabled
+            >
+                  {status}
+            </button>
+      );
+};
 
-export default function TasksPage() {
+export default function ViewTasksPage() {
       const [tasks, setTasks] = useState({});
       const [userDept, setUserDept] = useState(null);
       const [loading, setLoading] = useState(true);
@@ -56,13 +49,11 @@ export default function TasksPage() {
             const auth = getAuth();
             onAuthStateChanged(auth, (user) => {
                   if (user) {
-                        // 用戶已登錄，獲取用戶部門
                         const userRef = ref(database, `users/${user.uid}`);
                         onValue(userRef, (snapshot) => {
                               const userData = snapshot.val();
                               if (userData && userData.dept) {
                                     setUserDept(userData.dept);
-                                    // 獲取該部門的任務
                                     const tasksRef = ref(database, `tasks/${userData.dept}`);
                                     onValue(tasksRef, (snapshot) => {
                                           const data = snapshot.val();
@@ -74,7 +65,6 @@ export default function TasksPage() {
                               }
                         });
                   } else {
-                        // 用戶未登錄，重置狀態
                         setUserDept(null);
                         setTasks({});
                         setLoading(false);
@@ -93,21 +83,40 @@ export default function TasksPage() {
       }
 
       if (!userDept) {
-            return <div className="container mx-auto px-4 py-8">Please log in to view tasks.</div>;
+            return <div className="container mx-auto px-4 py-8">請登入帳號以查看教材需求表</div>;
       }
 
       return (
-            <div className="container mx-auto px-4 py-8">
-                  <h1 className="text-3xl font-bold mb-6">Tasks for {userDept}</h1>
-                  {Object.keys(tasks).length === 0 ? (
-                        <p>No tasks found for your department.</p>
-                  ) : (
-                        <ul className="space-y-6  text-black">
-                              {Object.entries(tasks).map(([taskId, task]) => (
-                                    <TaskCard key={taskId} task={task} />
-                              ))}
-                        </ul>
-                  )}
+            <div className="min-h-screen py-10 px-4 flex flex-col items-start justify-start">
+                  <div className="w-full max-w-xl mx-auto bg-white rounded-lg shadow-lg p-8">
+                        <h1 className="text-3xl font-bold mb-6">教材需求表 - 【{userDept}】</h1>
+                        {Object.keys(tasks).length === 0 ? (
+                              <p>No tasks found for your department.</p>
+                        ) : (
+                              <ul className="space-y-6">
+                                    {Object.entries(tasks).map(([taskId, task]) => (
+                                          <li key={taskId} className="bg-gray-50 p-4 rounded-lg border-solid border-2 border-black">
+                                                <h3 className="text-2xl text-center font-bold mb-4 text-black-700 border-b-2 border-blue-900 pb-2">
+                                                      &lt;&lt;&nbsp;&nbsp;&nbsp;{task.category}&nbsp;&nbsp;&nbsp;&gt;&gt;
+                                                </h3>
+                                                <div className="mb-4">
+                                                      <StatusButton status={task.state} />
+                                                </div>
+                                                <table className="w-full text-sm mb-4 text-black">
+                                                      <tbody>
+                                                            {taskProperties.map((prop, index) => (
+                                                                  <tr key={prop.key} className={index % 2 === 0 ? 'bg-gray-200' : ''}>
+                                                                        <td className="py-2 px-3 font-semibold">{prop.label}</td>
+                                                                        <td className="py-2 px-3">{task[prop.key]}</td>
+                                                                  </tr>
+                                                            ))}
+                                                      </tbody>
+                                                </table>
+                                          </li>
+                                    ))}
+                              </ul>
+                        )}
+                  </div>
             </div>
       );
 }
