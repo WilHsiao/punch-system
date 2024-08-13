@@ -95,7 +95,9 @@ export default function Navigation() {
     }
 
     const filteredLinks = allPunchSystemLinks.filter(link =>
-      link.requiredRoles.includes(userRole) || userRole === '主管'
+      userRole === '主管'
+      ? link.text !== '打卡機' // "主管"不顯示打卡機
+      : link.requiredRoles.includes(userRole)
     );
 
     return (
