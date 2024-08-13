@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ref, onValue } from 'firebase/database';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { database } from '@/config/firebaseConfig';
@@ -44,6 +44,16 @@ export default function ViewTasksPage() {
       const [tasks, setTasks] = useState({});
       const [userDept, setUserDept] = useState(null);
       const [loading, setLoading] = useState(true);
+      const [filters, setFilters] = useState({
+            category: 'all',
+            main: 'all',
+            tag: 'all'
+      });
+      const [options, setOptions] = useState({
+            category: ['all'],
+            main: ['all'],
+            tag: ['all']
+      });
 
       useEffect(() => {
             const auth = getAuth();
@@ -58,6 +68,7 @@ export default function ViewTasksPage() {
                                     onValue(tasksRef, (snapshot) => {
                                           const data = snapshot.val();
                                           setTasks(data || {});
+                                          updateFilterOptions(data || {});
                                           setLoading(false);
                                     });
                               } else {
@@ -71,6 +82,35 @@ export default function ViewTasksPage() {
                   }
             });
       }, []);
+
+      const updateFilterOptions = (data) => {
+            const newOptions = {
+                  category: ['all'],
+                  main: ['all'],
+                  tag: ['all']
+            };
+
+            Object.values(data).forEach(task => {
+                  if (!newOptions.category.includes(task.category)) newOptions.category.push(task.category);
+                  if (!newOptions.main.includes(task.main)) newOptions.main.push(task.main);
+                  if (!newOptions.tag.includes(task.tag)) newOptions.tag.push(task.tag);
+            });
+
+            setOptions(newOptions);
+      };
+
+      const handleFilterChange = (filterType, value) => {
+            setFilters(prevFilters => ({
+                  ...prevFilters,
+                  [filterType]: value
+            }));
+      };
+
+      const filteredTasks = Object.entries(tasks).filter(([_, task]) => {
+            return (filters.category === 'all' || task.category === filters.category) &&
+                  (filters.main === 'all' || task.main === filters.main) &&
+                  (filters.tag === 'all' || task.tag === filters.tag);
+      });
 
       if (loading) {
             return (
@@ -89,12 +129,40 @@ export default function ViewTasksPage() {
       return (
             <div className="min-h-screen py-10 px-4 flex flex-col items-start justify-start">
                   <div className="w-full max-w-xl mx-auto bg-white rounded-lg shadow-lg p-8">
-                        <h1 className="text-3xl font-bold mb-6">教材需求表 - 【{userDept}】</h1>
-                        {Object.keys(tasks).length === 0 ? (
-                              <p>No tasks found for your department.</p>
+                        <div className='text-center mb-6'>
+                              <h1 className="text-3xl font-bold mb-2">
+                                    教材需求表 - 【{userDept}】
+                              </h1>
+                              <span className="text-2xl font-bold text-red-500"> 目前 {Object.keys(tasks).length} 項任務</span>
+                        </div>
+                        <div className="mb-4 space-y-2">
+  {['category', 'main', 'tag'].map((filterType) => (
+    <div key={filterType} className="flex items-center">
+      <div className="w-20 flex-shrink-0">
+        <label htmlFor={filterType} className="text-sm font-medium whitespace-nowrap">
+          {taskProperties.find(prop => prop.key === filterType).label}：
+        </label>
+      </div>
+      <select
+        id={filterType}
+        value={filters[filterType]}
+        onChange={(e) => handleFilterChange(filterType, e.target.value)}
+        className="flex-1 border rounded p-2 text-sm"
+      >
+        {options[filterType].map((option) => (
+          <option key={option} value={option}>
+            {option === 'all' ? '全部' : option}
+          </option>
+        ))}
+      </select>
+    </div>
+  ))}
+</div>
+                        {filteredTasks.length === 0 ? (
+                              <p>沒有符合條件的任務。</p>
                         ) : (
                               <ul className="space-y-6">
-                                    {Object.entries(tasks).map(([taskId, task]) => (
+                                    {filteredTasks.map(([taskId, task]) => (
                                           <li key={taskId} className="bg-gray-50 p-4 rounded-lg border-solid border-2 border-black">
                                                 <h3 className="text-2xl text-center font-bold mb-4 text-black-700 border-b-2 border-blue-900 pb-2">
                                                       &lt;&lt;&nbsp;&nbsp;&nbsp;{task.category}&nbsp;&nbsp;&nbsp;&gt;&gt;
