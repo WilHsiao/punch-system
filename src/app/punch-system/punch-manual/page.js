@@ -8,7 +8,6 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useIamAccess } from '@/hooks/iam-access';
-// import PasswordUnlock from '@/hooks/page-pw-unlock';
 
 export default function PunchManual() {
   const { isAuthorized, isLoading } = useIamAccess();
@@ -17,7 +16,6 @@ export default function PunchManual() {
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
   const [punchType, setPunchType] = useState('');
-  const [unlocked, setUnlocked] = useState(false); // 用於控制是否解鎖
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
