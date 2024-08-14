@@ -1,87 +1,108 @@
+'use client';
 import React, { useRef, useEffect, useState } from 'react';
-import * as faceapi from 'face-api.js';
+import * as tf from '@tensorflow/tfjs';
+import * as blazeface from '@tensorflow-models/blazeface';
 
-const FaceRecognitionClockIn = () => {
+const SimplifiedFaceDetection = () => {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
-  const [isRecognizing, setIsRecognizing] = useState(false);
+  const [model, setModel] = useState(null);
+  const [isDetecting, setIsDetecting] = useState(false);
 
   useEffect(() => {
-    const loadModels = async () => {
-      await Promise.all([
-        faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
-        faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
-        faceapi.nets.faceRecognitionNet.loadFromUri('/models'),
-      ]);
+    const loadModel = async () => {
+      await tf.ready();
+      const loadedModel = await blazeface.load();
+      setModel(loadedModel);
+      console.log("Model loaded successfully");
     };
-    loadModels();
+
+    loadModel();
   }, []);
 
-  const startVideo = () => {
-    navigator.mediaDevices.getUserMedia({ video: {} })
-      .then((stream) => {
+  const startVideo = async () => {
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
         }
-      })
-      .catch((err) => console.error(err));
+      } catch (err) {
+        console.error("Error accessing the camera:", err);
+      }
+    }
   };
 
-  const handleRecognize = async () => {
-    if (!isRecognizing) {
-      setIsRecognizing(true);
+  const detectFaces = async () => {
+    if (model && videoRef.current && canvasRef.current) {
+      const video = videoRef.current;
+      const predictions = await model.estimateFaces(video, false);
+
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      predictions.forEach(prediction => {
+        const start = prediction.topLeft;
+        const end = prediction.bottomRight;
+        const size = [end[0] - start[0], end[1] - start[1]];
+
+        ctx.strokeStyle = 'red';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(start[0], start[1], size[0], size[1]);
+      });
+    }
+  };
+
+  const toggleDetection = () => {
+    if (!isDetecting) {
       startVideo();
+      setIsDetecting(true);
     } else {
-      setIsRecognizing(false);
+      setIsDetecting(false);
       if (videoRef.current && videoRef.current.srcObject) {
         videoRef.current.srcObject.getTracks().forEach(track => track.stop());
       }
     }
   };
 
-  const recognize = async () => {
-    if (videoRef.current && canvasRef.current) {
-      const detections = await faceapi.detectAllFaces(
-        videoRef.current,
-        new faceapi.TinyFaceDetectorOptions()
-      ).withFaceLandmarks().withFaceDescriptors();
-
-      // Here you would compare the detected face with your database
-      // For demonstration, we'll just log the detections
-      console.log(detections);
-
-      // Draw detections
-      const displaySize = { width: videoRef.current.width, height: videoRef.current.height };
-      faceapi.matchDimensions(canvasRef.current, displaySize);
-      const resizedDetections = faceapi.resizeResults(detections, displaySize);
-      canvasRef.current.getContext('2d').clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-      faceapi.draw.drawDetections(canvasRef.current, resizedDetections);
-    }
-  };
-
   useEffect(() => {
-    let interval;
-    if (isRecognizing) {
-      interval = setInterval(recognize, 100);
+    let detectionInterval;
+    if (isDetecting && model) {
+      detectionInterval = setInterval(detectFaces, 100);
     }
-    return () => clearInterval(interval);
-  }, [isRecognizing]);
+    return () => clearInterval(detectionInterval);
+  }, [isDetecting, model]);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-      <h1 className="text-3xl font-bold mb-4">員工人臉辨識打卡</h1>
+      <h1 className="text-3xl font-bold mb-4">簡化版人臉檢測</h1>
       <div className="relative">
-        <video ref={videoRef} autoPlay muted className="rounded-lg shadow-lg" />
-        <canvas ref={canvasRef} className="absolute top-0 left-0" />
+        <video 
+          ref={videoRef} 
+          autoPlay 
+          muted 
+          className="rounded-lg shadow-lg"
+          width={640}
+          height={480}
+        />
+        <canvas 
+          ref={canvasRef} 
+          className="absolute top-0 left-0"
+          width={640}
+          height={480}
+        />
       </div>
       <button
-        onClick={handleRecognize}
-        className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+        onClick={toggleDetection}
+        disabled={!model}
+        className={`mt-4 px-4 py-2 ${model ? 'bg-blue-500 hover:bg-blue-600' : 'bg-gray-400'} text-white rounded transition-colors`}
       >
-        {isRecognizing ? '停止辨識' : '開始辨識'}
+        {isDetecting ? '停止檢測' : '開始檢測'}
       </button>
+      {!model && <p className="mt-2 text-red-500">正在加載模型，請稍候...</p>}
     </div>
   );
 };
 
-export default FaceRecognitionClockIn;
+export default SimplifiedFaceDetection;
