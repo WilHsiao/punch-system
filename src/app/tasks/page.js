@@ -136,28 +136,28 @@ export default function ViewTasksPage() {
                               <span className="text-2xl font-bold text-red-500"> 目前 {Object.keys(tasks).length} 項任務</span>
                         </div>
                         <div className="mb-4 space-y-2">
-  {['category', 'main', 'tag'].map((filterType) => (
-    <div key={filterType} className="flex items-center">
-      <div className="w-20 flex-shrink-0">
-        <label htmlFor={filterType} className="text-sm font-medium whitespace-nowrap">
-          {taskProperties.find(prop => prop.key === filterType).label}：
-        </label>
-      </div>
-      <select
-        id={filterType}
-        value={filters[filterType]}
-        onChange={(e) => handleFilterChange(filterType, e.target.value)}
-        className="flex-1 border rounded p-2 text-sm"
-      >
-        {options[filterType].map((option) => (
-          <option key={option} value={option}>
-            {option === 'all' ? '全部' : option}
-          </option>
-        ))}
-      </select>
-    </div>
-  ))}
-</div>
+                              {['category', 'main', 'tag'].map((filterType) => (
+                                    <div key={filterType} className="flex items-center">
+                                          <div className="w-20 flex-shrink-0">
+                                                <label htmlFor={filterType} className="text-sm font-medium whitespace-nowrap">
+                                                      {taskProperties.find(prop => prop.key === filterType).label}：
+                                                </label>
+                                          </div>
+                                          <select
+                                                id={filterType}
+                                                value={filters[filterType]}
+                                                onChange={(e) => handleFilterChange(filterType, e.target.value)}
+                                                className="flex-1 border rounded p-2 text-sm"
+                                          >
+                                                {options[filterType].map((option) => (
+                                                      <option key={option} value={option}>
+                                                            {option === 'all' ? '全部' : option}
+                                                      </option>
+                                                ))}
+                                          </select>
+                                    </div>
+                              ))}
+                        </div>
                         {filteredTasks.length === 0 ? (
                               <p>沒有符合條件的任務。</p>
                         ) : (
