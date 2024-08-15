@@ -10,8 +10,11 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.24.7",
+    "@tensorflow/tfjs": "^2.7.0",
     "axios": "^1.7.2",
-    "firebase": "^10.12.3",
+    "encoding": "^0.1.13",
+    "face-api.js": "^0.22.2",
+    "firebase": "^10.12.5",
     "firebase-admin": "^12.2.0",
     "next": "14.2.4",
     "node-fetch": "^3.3.2",
