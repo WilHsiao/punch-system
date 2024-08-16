@@ -130,7 +130,7 @@ export default function ViewTasksPage() {
             <div className="min-h-screen py-10 px-4 flex flex-col items-start justify-start">
                   <div className="w-full max-w-xl mx-auto bg-white rounded-lg shadow-lg p-8">
                         <div className='text-center mb-6'>
-                              <h1 className="text-3xl font-bold mb-2">
+                              <h1 className="text-3xl font-bold mb-2 text-gray-700">
                                     教材需求表 - 【{userDept}】
                               </h1>
                               <span className="text-2xl font-bold text-red-500"> 目前 {Object.keys(tasks).length} 項任務</span>
@@ -139,7 +139,7 @@ export default function ViewTasksPage() {
                               {['category', 'main', 'tag'].map((filterType) => (
                                     <div key={filterType} className="flex items-center">
                                           <div className="w-20 flex-shrink-0">
-                                                <label htmlFor={filterType} className="text-sm font-medium whitespace-nowrap">
+                                                <label htmlFor={filterType} className="text-sm font-medium text-gray-700 whitespace-nowrap">
                                                       {taskProperties.find(prop => prop.key === filterType).label}：
                                                 </label>
                                           </div>
@@ -147,7 +147,7 @@ export default function ViewTasksPage() {
                                                 id={filterType}
                                                 value={filters[filterType]}
                                                 onChange={(e) => handleFilterChange(filterType, e.target.value)}
-                                                className="flex-1 border rounded p-2 text-sm"
+                                                className="flex-1 border rounded p-2 text-sm text-gray-700"
                                           >
                                                 {options[filterType].map((option) => (
                                                       <option key={option} value={option}>
@@ -164,7 +164,7 @@ export default function ViewTasksPage() {
                               <ul className="space-y-6">
                                     {filteredTasks.map(([taskId, task]) => (
                                           <li key={taskId} className="bg-gray-50 p-4 rounded-lg border-solid border-2 border-black">
-                                                <h3 className="text-2xl text-center font-bold mb-4 text-black-700 border-b-2 border-blue-900 pb-2">
+                                                <h3 className="text-2xl text-center text-gray-700 font-bold mb-4 text-black-700 border-b-2 border-blue-900 pb-2">
                                                       &lt;&lt;&nbsp;&nbsp;&nbsp;{task.category}&nbsp;&nbsp;&nbsp;&gt;&gt;
                                                 </h3>
                                                 <div className="mb-4">
