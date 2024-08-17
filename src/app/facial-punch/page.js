@@ -111,6 +111,8 @@ const FacialRecognitionPunch = () => {
         const users = usersSnapshot.val();
 
         for (const [uid, userData] of Object.entries(users)) {
+
+            // 調整數值 -> 0.6 ，越低標準越嚴格
             if (userData.faceDescriptor && faceapi.euclideanDistance(faceDescriptor, userData.faceDescriptor) < 0.6) {
                 return { uid, ...userData };
             }
@@ -144,20 +146,20 @@ const FacialRecognitionPunch = () => {
                 if (punchesSnapshot.exists()) {
                     const lastPunchTime = new Date(Object.values(punchesSnapshot.val())[0].timestamp);
                     if ((now - lastPunchTime) < 5 * 60 * 1000) {
-                        toast.error('重複打卡，請稍後再試！', { autoClose: 2000 });
+                        toast.error('重複打卡，請稍後再試！', { autoClose: 1500 });
                         return;
                     }
                 }
 
                 const punchRef = ref(database, `punches/${uid}/${new Date().toISOString().replace(/\W/g, '')}`);
                 await set(punchRef, { timestamp: serverTimestamp(), type: currentPunchType });
-                toast.success(`${userData.name} ${currentPunchType}打卡成功！`, { autoClose: 2000 });
+                toast.success(`${userData.name} ${currentPunchType}打卡成功！`, { autoClose: 1500 });
             } else {
-                toast.error('用戶不存在！', { autoClose: 2000 });
+                toast.error('用戶不存在！', { autoClose: 1500 });
             }
         } catch (error) {
             console.error("Error handling punch: ", error);
-            toast.error('打卡過程出現錯誤！', { autoClose: 2000 });
+            toast.error('打卡過程出現錯誤！', { autoClose: 1500 });
         }
     };
 
