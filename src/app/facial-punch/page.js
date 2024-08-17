@@ -128,6 +128,8 @@ const FacialRecognitionPunch = () => {
 
     const handlePunch = async (uid) => {
         try {
+
+            // 特殊時段確認是否打卡
             const currentHour = new Date().getHours();
             const currentPunchType = punchType;
             if ((currentHour < 10 && currentPunchType === '下班') || (currentHour >= 20 && currentPunchType === '上班')) {
@@ -136,7 +138,8 @@ const FacialRecognitionPunch = () => {
 
             const userRef = ref(database, `users/${uid}`);
             const userSnapshot = await get(userRef);
-
+            
+            // 避免短時間打卡
             if (userSnapshot.exists()) {
                 const userData = userSnapshot.val();
                 const now = Date.now();
