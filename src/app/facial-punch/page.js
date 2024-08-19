@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { database } from '@/config/firebaseConfig';
 import { set, ref, get, serverTimestamp, query, orderByChild, limitToLast } from 'firebase/database';
 import { toast, ToastContainer } from 'react-toastify';
@@ -23,6 +23,7 @@ const loadModels = async () => {
 const FacialRecognitionPunch = () => {
     const [isModelLoaded, setIsModelLoaded] = useState(false);
     const [punchType, setPunchType] = useState(() => typeof window !== 'undefined' ? localStorage.getItem('punchType') || '上班' : '上班');
+    const [isPunchSuccessful, setIsPunchSuccessful] = useState(false);
     const videoRef = useRef(null);
     const canvasRef = useRef(null);
     const streamRef = useRef(null);
@@ -45,7 +46,7 @@ const FacialRecognitionPunch = () => {
     }, []);
 
     useEffect(() => {
-        if (isModelLoaded) {
+        if (isModelLoaded && !isPunchSuccessful) {
             const startVideo = async () => {
                 try {
                     const stream = await navigator.mediaDevices.getUserMedia({ video: {} });
@@ -69,7 +70,7 @@ const FacialRecognitionPunch = () => {
                 faceapi.matchDimensions(canvas, displaySize);
 
                 const detectFaces = async () => {
-                    if (!video || video.paused || video.ended) {
+                    if (!video || video.paused || video.ended || isPunchSuccessful) {
                         detectFacesRef.current = requestAnimationFrame(detectFaces);
                         return;
                     }
@@ -87,7 +88,13 @@ const FacialRecognitionPunch = () => {
                                 faceapi.draw.drawDetections(canvas, resizedDetections);
 
                                 const matchedUser = await matchFaceWithDatabase(resizedDetections[0].descriptor);
-                                matchedUser ? await handlePunch(matchedUser.uid) : toast.error('未識別的用戶');
+                                if (matchedUser) {
+                                    await handlePunch(matchedUser.uid);
+                                    setIsPunchSuccessful(true);
+                                    stopVideoStream();
+                                } else {
+                                    toast.error('未識別的用戶');
+                                }
 
                                 setTimeout(() => isProcessing.current = false, 1500);
                             }
@@ -104,15 +111,25 @@ const FacialRecognitionPunch = () => {
             videoRef.current.addEventListener('play', handleVideoPlay);
             return () => videoRef.current?.removeEventListener('play', handleVideoPlay);
         }
-    }, [isModelLoaded]);
+    }, [isModelLoaded, isPunchSuccessful]);
+
+    const stopVideoStream = () => {
+        if (streamRef.current) {
+            streamRef.current.getTracks().forEach(track => track.stop());
+        }
+        if (videoRef.current) {
+            videoRef.current.srcObject = null;
+        }
+        if (detectFacesRef.current) {
+            cancelAnimationFrame(detectFacesRef.current);
+        }
+    };
 
     const matchFaceWithDatabase = async (faceDescriptor) => {
         const usersSnapshot = await get(ref(database, 'users'));
         const users = usersSnapshot.val();
 
         for (const [uid, userData] of Object.entries(users)) {
-
-            // 調整數值 -> 0.6 ，越低標準越嚴格
             if (userData.faceDescriptor && faceapi.euclideanDistance(faceDescriptor, userData.faceDescriptor) < 0.6) {
                 return { uid, ...userData };
             }
@@ -128,8 +145,6 @@ const FacialRecognitionPunch = () => {
 
     const handlePunch = async (uid) => {
         try {
-
-            // 特殊時段確認是否打卡
             const currentHour = new Date().getHours();
             const currentPunchType = punchType;
             if ((currentHour < 10 && currentPunchType === '下班') || (currentHour >= 20 && currentPunchType === '上班')) {
@@ -139,7 +154,6 @@ const FacialRecognitionPunch = () => {
             const userRef = ref(database, `users/${uid}`);
             const userSnapshot = await get(userRef);
             
-            // 避免短時間打卡
             if (userSnapshot.exists()) {
                 const userData = userSnapshot.val();
                 const now = Date.now();
@@ -148,7 +162,7 @@ const FacialRecognitionPunch = () => {
                 const punchesSnapshot = await get(punchesQuery);
                 if (punchesSnapshot.exists()) {
                     const lastPunchTime = new Date(Object.values(punchesSnapshot.val())[0].timestamp);
-                    if ((now - lastPunchTime) < 5 * 60 * 1000) {
+                    if ((now - lastPunchTime) < 1 * 60 * 1000) {
                         toast.error('重複打卡，請稍後再試！', { autoClose: 1500 });
                         return;
                     }
@@ -157,6 +171,7 @@ const FacialRecognitionPunch = () => {
                 const punchRef = ref(database, `punches/${uid}/${new Date().toISOString().replace(/\W/g, '')}`);
                 await set(punchRef, { timestamp: serverTimestamp(), type: currentPunchType });
                 toast.success(`${userData.name} ${currentPunchType}打卡成功！`, { autoClose: 1500 });
+                setIsPunchSuccessful(true);
             } else {
                 toast.error('用戶不存在！', { autoClose: 1500 });
             }
@@ -164,6 +179,16 @@ const FacialRecognitionPunch = () => {
             console.error("Error handling punch: ", error);
             toast.error('打卡過程出現錯誤！', { autoClose: 1500 });
         }
+    };
+
+    const resetPunch = () => {
+        setIsPunchSuccessful(false);
+        setIsModelLoaded(false);
+        const initialize = async () => {
+            const modelLoaded = await loadModels();
+            setIsModelLoaded(modelLoaded);
+        };
+        initialize();
     };
 
     return (
@@ -177,6 +202,7 @@ const FacialRecognitionPunch = () => {
                                 key={type}
                                 className={`px-4 py-2 rounded ${punchType === type ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-700'}`}
                                 onClick={() => handlePunchTypeChange(type)}
+                                disabled={isPunchSuccessful}
                             >
                                 {type}
                             </button>
@@ -184,8 +210,22 @@ const FacialRecognitionPunch = () => {
                     </div>
                 </div>
                 <div className="flex justify-center items-center w-full">
-                    <video ref={videoRef} width="720" height="560" autoPlay muted playsInline />
-                    <canvas ref={canvasRef} style={{ position: 'absolute' }} />
+                    {!isPunchSuccessful ? (
+                        <>
+                            <video ref={videoRef} width="720" height="560" autoPlay muted playsInline />
+                            <canvas ref={canvasRef} style={{ position: 'absolute' }} />
+                        </>
+                    ) : (
+                        <div className="text-center">
+                            <p className="text-xl font-semibold mb-4">打卡成功！</p>
+                            <button
+                                className="px-4 py-2 bg-green-500 text-white rounded"
+                                onClick={resetPunch}
+                            >
+                                重新打卡
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
             <ToastContainer />
