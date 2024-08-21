@@ -114,49 +114,53 @@ export default function Punch() {
 
       const handlePunch = async () => {
             if (!uid || !name) {
-                toast.error('請確保 UID 和姓名欄位都已填寫', { autoClose: 2000 });
-                return;
+                  toast.error('請確保 UID 和姓名欄位都已填寫', { autoClose: 2000 });
+                  return;
             }
-        
+
             if (punchType === '') {
-                toast.error('請選擇打卡類型！', { autoClose: 2000 });
-                return;
+                  toast.error('請選擇打卡類型！', { autoClose: 2000 });
+                  return;
             }
-        
+
             const currentHour = new Date().getHours();
             if ((currentHour < 10 && punchType === '下班') || (currentHour >= 20 && punchType === '上班')) {
-                if (!window.confirm('確定要在這個時間打卡嗎？')) {
-                    return;
-                }
-            }
-        
-            try {
-                const punchesQuery = query(ref(database, `punches/${uid}`), orderByChild('timestamp'), limitToLast(1));
-                const punchesSnapshot = await get(punchesQuery);
-                if (punchesSnapshot.exists()) {
-                    const lastPunch = Object.values(punchesSnapshot.val())[0];
-                    const lastPunchTime = new Date(lastPunch.timestamp);
-                    const now = new Date();
-        
-                    if ((now - lastPunchTime) < 5 * 60 * 1000) {
-                        toast.error('重複打卡，請稍後再試！', { autoClose: 2000 });
+                  if (!window.confirm('確定要在這個時間打卡嗎？')) {
                         return;
-                    }
-                }
-        
-                const punchData = { timestamp: serverTimestamp(), type: punchType };
-                const punchRef = ref(database, `punches/${uid}/${new Date().toISOString().replace(/\W/g, '')}`);
-                await set(punchRef, punchData);
-                console.log("Punch recorded successfully.");
-                toast.success(`${name} 打卡成功！`, { autoClose: 2000 });
-        
-                await sendLineNotify(uid, name, punchType);
-        
-            } catch (error) {
-                console.error("Error handling punch: ", error);
-                toast.error('打卡過程出現錯誤，請向管理員反映！', { autoClose: 2000 });
+                  }
             }
-        };
+
+            try {
+                  const punchesQuery = query(ref(database, `punches/${uid}`), orderByChild('timestamp'), limitToLast(1));
+                  const punchesSnapshot = await get(punchesQuery);
+                  if (punchesSnapshot.exists()) {
+                        const lastPunch = Object.values(punchesSnapshot.val())[0];
+                        const lastPunchTime = new Date(lastPunch.timestamp);
+                        const now = new Date();
+
+                        if ((now - lastPunchTime) < 5 * 60 * 1000) {
+                              toast.error('重複打卡，請稍後再試！', { autoClose: 2000 });
+                              return;
+                        }
+                  }
+
+                  const punchData = { timestamp: serverTimestamp(), type: punchType };
+                  const punchRef = ref(database, `punches/${uid}/${new Date().toISOString().replace(/\W/g, '')}`);
+                  await set(punchRef, punchData);
+                  console.log("Punch recorded successfully.");
+                  toast.success(`${name} 打卡成功！`, { autoClose: 2000 });
+
+                  await sendLineNotify(uid, name, punchType);
+
+                  // 清空 uid 和 name 輸入欄位
+                  setUid('');
+                  setName('');
+
+            } catch (error) {
+                  console.error("Error handling punch: ", error);
+                  toast.error('打卡過程出現錯誤，請向管理員反映！', { autoClose: 2000 });
+            }
+      };
 
       const handlePunchTypeChange = (type) => {
             setPunchType(type);
