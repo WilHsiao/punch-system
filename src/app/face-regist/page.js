@@ -13,9 +13,11 @@ export default function FaceRegistration() {
     const [uploadedImage, setUploadedImage] = useState(null);
     const [showMedia, setShowMedia] = useState(false);
     const [isUsingCamera, setIsUsingCamera] = useState(false);
+    const [isProcessing, setIsProcessing] = useState(false);
     const videoRef = useRef(null);
     const canvasRef = useRef(null);
     const fileInputRef = useRef(null);
+    const streamRef = useRef(null);
 
     useEffect(() => {
         const loadModels = async () => {
@@ -39,11 +41,25 @@ export default function FaceRegistration() {
             const stream = await navigator.mediaDevices.getUserMedia({ video: {} });
             if (videoRef.current) {
                 videoRef.current.srcObject = stream;
+                streamRef.current = stream;
             }
         } catch (error) {
             console.error('Error accessing camera:', error);
             toast.error('無法訪問攝像頭');
         }
+    };
+
+    const stopVideo = () => {
+        if (streamRef.current) {
+            const tracks = streamRef.current.getTracks();
+            tracks.forEach(track => track.stop());
+            streamRef.current = null;
+            if (videoRef.current) {
+                videoRef.current.srcObject = null;
+            }
+        }
+        setIsUsingCamera(false);
+        setShowMedia(false);
     };
 
     const handleFileUpload = (event) => {
@@ -76,6 +92,9 @@ export default function FaceRegistration() {
             toast.error('請先開啟鏡頭或上傳照片');
             return;
         }
+
+        setIsProcessing(true);
+        toast.info('正在處理，請稍候...', { autoClose: false });
 
         let imageElement;
         if (uploadedImage) {
@@ -122,35 +141,46 @@ export default function FaceRegistration() {
                 // 保存更新後的用戶數據到 Realtime Database
                 await set(userRef, updatedData);
 
+                toast.dismiss();
                 toast.success('人臉註冊成功！');
+
+                // 如果使用攝像頭，註冊成功後關閉攝像頭
+                if (isUsingCamera) {
+                    stopVideo();
+                    setIsUsingCamera(false);
+                    setShowMedia(false);
+                }
             } else {
                 toast.error('未檢測到人臉，請確保照片中有清晰的人臉');
             }
         } catch (error) {
             console.error('Error processing image:', error);
             toast.error('處理圖像時出錯');
+        } finally {
+            setIsProcessing(false);
         }
     };
 
     return (
         <div className="min-h-screen py-10 px-4 flex flex-col items-center justify-start">
-            <h1 className="text-2xl font-bold mb-4">人臉註冊</h1>
+            <h1 className="text-2xl font-bold mb-4">【 人臉註冊 】</h1>
             <div>
-            <input
-                type="text"
-                value={userName}
-                onChange={(e) => setUserName(e.target.value)}
-                placeholder="輸入用戶名"
-                className="mb-4 p-2 border rounded"
-            />
-            <button
-                onClick={captureAndRegister}
-                className="m-4 px-6 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-transform transform hover:scale-105 shadow-lg"
-            >
-                註冊人臉
-            </button>
+                <input
+                    type="text"
+                    value={userName}
+                    onChange={(e) => setUserName(e.target.value)}
+                    placeholder="輸入用戶名"
+                    className="m-4 p-2 border rounded"
+                />
+                <button
+                    onClick={captureAndRegister}
+                    disabled={isProcessing}
+                    className={`m-4 px-10 py-4 bg-gradient-to-r from-purple-500 to-pink-500 font-bold text-white rounded-2xl hover:from-purple-700 hover:to-pink-700 transition-transform transform hover:scale-105 shadow-lg ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                    {isProcessing ? '處理中...' : '註冊'}
+                </button>
             </div>
-            <div className="mb-4 flex space-x-4">
+            <div className="flex">
                 <input
                     type="file"
                     accept="image/*"
@@ -160,15 +190,22 @@ export default function FaceRegistration() {
                 />
                 <button
                     onClick={() => fileInputRef.current.click()}
-                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                    className="m-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
                 >
                     上傳照片
                 </button>
                 <button
                     onClick={handleCameraClick}
-                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                    className="m-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
                 >
                     開啟鏡頭
+                </button>
+                <button
+                    onClick={stopVideo}
+                    className="m-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                    disabled={!isUsingCamera}
+                >
+                    關閉鏡頭
                 </button>
             </div>
             {showMedia && (

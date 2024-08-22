@@ -421,13 +421,13 @@ export default function Punch() {
                                     onClick={() => setScanning(true)}
                                     className="px-6 py-3 bg-gradient-to-r from-blue-500 to-green-500 text-white rounded-lg hover:from-blue-700 hover:to-green-700 transition-transform transform hover:scale-105 shadow-lg"
                                 >
-                                    開啟 QRcode 掃描器
+                                    QRcode 掃描
                                 </button>
                                 <button
                                     onClick={startFacialRecognition}
                                     className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-transform transform hover:scale-105 shadow-lg"
                                 >
-                                    開啟人臉辨識掃描器
+                                    人臉辨識掃描
                                 </button>
                             </div>
                         )}
