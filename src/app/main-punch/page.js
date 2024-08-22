@@ -183,7 +183,10 @@ export default function Punch() {
         }
 
         try {
-            const punchesQuery = query(ref(database, `punches/${punchUid}`), orderByChild('timestamp'), limitToLast(1));
+            // Ensure punchUid is a string
+            const sanitizedPunchUid = String(punchUid);
+
+            const punchesQuery = query(ref(database, `punches/${sanitizedPunchUid}`), orderByChild('timestamp'), limitToLast(1));
             const punchesSnapshot = await get(punchesQuery);
             if (punchesSnapshot.exists()) {
                 const lastPunch = Object.values(punchesSnapshot.val())[0];
@@ -197,13 +200,13 @@ export default function Punch() {
             }
 
             const punchData = { timestamp: serverTimestamp(), type: punchType };
-            const punchRef = ref(database, `punches/${punchUid}/${new Date().toISOString().replace(/\W/g, '')}`);
+            const punchRef = ref(database, `punches/${sanitizedPunchUid}/${new Date().toISOString().replace(/\W/g, '')}`);
             await set(punchRef, punchData);
             console.log("Punch recorded successfully.");
 
             let punchName = name;
             if (detectedUid) {
-                const userRef = ref(database, `users/${detectedUid}`);
+                const userRef = ref(database, `users/${sanitizedPunchUid}`);
                 const userSnapshot = await get(userRef);
                 if (userSnapshot.exists()) {
                     punchName = userSnapshot.val().name;
@@ -212,7 +215,7 @@ export default function Punch() {
 
             toast.success(`${punchName} 打卡成功！`, { autoClose: 2000 });
 
-            await sendLineNotify(punchUid, punchName, punchType);
+            await sendLineNotify(sanitizedPunchUid, punchName, punchType);
 
             // 清空 uid 和 name 輸入欄位
             setUid('');
@@ -373,8 +376,8 @@ export default function Punch() {
                                 <button
                                     key={type}
                                     className={`px-6 py-3 rounded-lg transition-colors duration-300 ${punchType === type
-                                            ? 'bg-blue-600 text-white'
-                                            : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+                                        ? 'bg-blue-600 text-white'
+                                        : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
                                         }`}
                                     onClick={() => handlePunchTypeChange(type)}
                                 >
@@ -386,35 +389,35 @@ export default function Punch() {
                     <div className="flex justify-center items-center w-full mb-4">
                         {scanning ? (
                             <div className='w-full'>
-                            <div className="w-full h-full">
-                                <QrReader
-                                    key={Date.now()}
-                                    delay={300}
-                                    onError={handleError}
-                                    onScan={handleScan}
-                                    style={{ width: '100%', height: '100%' }}
-                                />
+                                <div className="w-full h-full">
+                                    <QrReader
+                                        key={Date.now()}
+                                        delay={300}
+                                        onError={handleError}
+                                        onScan={handleScan}
+                                        style={{ width: '100%', height: '100%' }}
+                                    />
+                                </div>
+                                <button
+                                    onClick={closeScanner}
+                                    className="w-full px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-300 mt-2"
+                                >
+                                    關閉掃描器
+                                </button>
                             </div>
-                            <button
-                            onClick={closeScanner}
-                            className="w-full px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-300 mt-2"
-                        >
-                            關閉掃描器
-                        </button>
-                        </div>
                         ) : isCameraActive ? (
                             <div className='w-full'>
-                            <div className="relative w-full h-full">
-                                <video ref={videoRef} width="720" height="560" autoPlay muted playsInline />
-                                <canvas ref={canvasRef} style={{ position: 'absolute', top: 0, left: 0 }} />
+                                <div className="relative w-full h-full">
+                                    <video ref={videoRef} width="720" height="560" autoPlay muted playsInline />
+                                    <canvas ref={canvasRef} style={{ position: 'absolute', top: 0, left: 0 }} />
+                                </div>
+                                <button
+                                    onClick={closeFacialRecognition}
+                                    className="w-full px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-300 mt-2"
+                                >
+                                    關閉掃描器
+                                </button>
                             </div>
-                            <button
-                            onClick={closeFacialRecognition}
-                            className="w-full px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-300 mt-2"
-                        >
-                            關閉掃描器
-                        </button>
-                        </div>
                         ) : (
                             <div className="flex flex-col space-y-4">
                                 <button
