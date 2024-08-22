@@ -1,5 +1,3 @@
-// */punch-system/punch
-
 'use client';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { database } from '@/config/firebaseConfig';
@@ -10,7 +8,6 @@ import dynamic from 'next/dynamic';
 import { useIamAccess } from '@/hooks/iam-access';
 import * as faceapi from 'face-api.js';
 
-// 動態加載 QrReader 組件，只在客戶端渲染
 const QrReader = dynamic(() => import('react-qr-scanner'), { ssr: false });
 
 const sendLineNotify = async (uid, name, punchType) => {
@@ -18,58 +15,48 @@ const sendLineNotify = async (uid, name, punchType) => {
         const tokenRef = ref(database, `line_tokens/${uid}`);
         const tokenSnapshot = await get(tokenRef);
 
-        if (tokenSnapshot.exists()) {
-            const tokenData = tokenSnapshot.val();
-            console.log('Token 數據:', tokenData);
-
-            const tokenKeys = Object.keys(tokenData);
-
-            if (tokenKeys.length === 0) {
-                throw new Error('未找到 Line Notify token 數據');
-            }
-
-            const message = `${name}已於${new Date().toLocaleString()}${punchType}打卡`;
-
-            console.log('準備發送的消息:', message);
-
-            // 遍歷所有的 token 並發送通知
-            for (const key of tokenKeys) {
-                const token = tokenData[key].token;
-                if (!token) {
-                    console.log(`未找到有效的 Line Notify token for key ${key}`);
-                    continue;
-                }
-                console.log('使用的 token 的前幾個字符:', token.substring(0, 5) + '...');
-
-                const response = await fetch('/api/send-line-notify', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ message, token })
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || '發送 Line Notify 失敗');
-                }
-                console.log(`Line Notify 發送成功 for token key ${key}`);
-            }
-        } else {
-            console.log('找不到該用戶的 Line token');
+        if (!tokenSnapshot.exists()) {
             throw new Error('找不到該用戶的 Line token');
+        }
+
+        const tokenData = tokenSnapshot.val();
+        const tokenKeys = Object.keys(tokenData);
+
+        if (tokenKeys.length === 0) {
+            throw new Error('未找到 Line Notify token 數據');
+        }
+
+        const message = `${name}已於${new Date().toLocaleString()}${punchType}打卡`;
+
+        for (const key of tokenKeys) {
+            const token = tokenData[key].token;
+            if (!token) continue;
+
+            const response = await fetch('/api/send-line-notify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message, token })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || '發送 Line Notify 失敗');
+            }
         }
     } catch (error) {
         console.error('發送 Line Notify 時出錯:', error);
+        toast.error(`Line 通知發送失敗: ${error.message}`);
     }
 };
 
 const loadModels = async () => {
     const MODEL_URL = '/models';
     try {
-        await faceapi.loadSsdMobilenetv1Model(MODEL_URL);
-        await faceapi.loadFaceLandmarkModel(MODEL_URL);
-        await faceapi.loadFaceRecognitionModel(MODEL_URL);
+        await Promise.all([
+            faceapi.loadSsdMobilenetv1Model(MODEL_URL),
+            faceapi.loadFaceLandmarkModel(MODEL_URL),
+            faceapi.loadFaceRecognitionModel(MODEL_URL)
+        ]);
         return true;
     } catch (error) {
         console.error('Error loading face-api models:', error);
@@ -79,50 +66,25 @@ const loadModels = async () => {
 };
 
 export default function Punch() {
-    const { isAuthorized, isLoading, userRole } = useIamAccess(['打卡機'], []);
+    const { isAuthorized, isLoading } = useIamAccess(['打卡機'], []);
     const [name, setName] = useState('');
     const [uid, setUid] = useState('');
     const [scanning, setScanning] = useState(false);
-    const [punchType, setPunchType] = useState(() => {
-        return typeof window !== 'undefined' ? localStorage.getItem('punchType') || '' : '';
-    });
-    const lastScanTime = useRef(Date.now());
-    const isProcessing = useRef(false);
-
-    // New state variables for facial recognition
+    const [punchType, setPunchType] = useState(() => localStorage.getItem('punchType') || '');
     const [isModelLoaded, setIsModelLoaded] = useState(false);
     const [isCameraActive, setIsCameraActive] = useState(false);
     const [isPunchSuccessful, setIsPunchSuccessful] = useState(false);
+    
+    const lastScanTime = useRef(Date.now());
+    const isProcessing = useRef(false);
     const videoRef = useRef(null);
     const canvasRef = useRef(null);
     const streamRef = useRef(null);
     const detectFacesRef = useRef(null);
 
-    const closeScanner = () => {
-        setScanning(false);
-    };
-
-    const closeFacialRecognition = () => {
-        setIsCameraActive(false);
-        stopVideoStream();
-    };
-
     useEffect(() => {
-        const savedPunchType = localStorage.getItem('punchType');
-        if (savedPunchType) {
-            setPunchType(savedPunchType);
-        }
-
-        // Initialize facial recognition models
-        const initialize = async () => {
-            const modelLoaded = await loadModels();
-            setIsModelLoaded(modelLoaded);
-        };
-        initialize();
-
-        return () => {
-            stopVideoStream();
-        };
+        loadModels().then(setIsModelLoaded);
+        return () => stopVideoStream();
     }, []);
 
     useEffect(() => {
@@ -135,16 +97,15 @@ export default function Punch() {
         if (data && !isProcessing.current) {
             isProcessing.current = true;
             setScanning(false);
-            console.log("QR Code detected: ", data.text);
-            toast.success('QR code 辨識成功，已填入 UID 和姓名', { autoClose: 1500 });
-            setUid(data.text);
+            const scannedUid = String(data.text);
+            setUid(scannedUid);
 
             try {
-                const userRef = ref(database, `users/${data.text}`);
+                const userRef = ref(database, `users/${scannedUid}`);
                 const userSnapshot = await get(userRef);
                 if (userSnapshot.exists()) {
-                    const userData = userSnapshot.val();
-                    setName(userData.name);
+                    setName(userSnapshot.val().name);
+                    toast.success('QR code 辨識成功，已填入 UID 和姓名', { autoClose: 1500 });
                 } else {
                     toast.error('用戶不存在！', { autoClose: 2000 });
                 }
@@ -158,100 +119,57 @@ export default function Punch() {
         }
     }, []);
 
-    const handleError = useCallback((err) => {
-        console.error("QR Reader Error: ", err);
-        toast.error(`掃描 QR Code 失敗: ${err}`, { autoClose: 2000 });
-    }, []);
-
-    const handlePunch = async (detectedUid = null) => {
-        const punchUid = detectedUid || uid;
-        if (!punchUid || (!detectedUid && !name)) {
-            toast.error('請確保 UID 和姓名欄位都已填寫', { autoClose: 2000 });
-            return;
-        }
-
-        if (punchType === '') {
-            toast.error('請選擇打卡類型！', { autoClose: 2000 });
-            return;
-        }
-
-        const currentHour = new Date().getHours();
-        if ((currentHour < 10 && punchType === '下班') || (currentHour >= 20 && punchType === '上班')) {
-            if (!window.confirm('確定要在這個時間打卡嗎？')) {
-                return;
-            }
-        }
-
+    const handlePunch = async () => {
         try {
-            // Ensure punchUid is a string
-            const sanitizedPunchUid = String(punchUid).trim();
-
-            if (!sanitizedPunchUid) {
-                throw new Error('無效的 UID');
+            if (!uid || !name || punchType === '') {
+                throw new Error('請確保 UID、姓名和打卡類型都已填寫');
             }
 
-            console.log('使用的 UID:', sanitizedPunchUid);
+            const sanitizedPunchUid = String(uid).trim();
+            if (!sanitizedPunchUid) {
+                throw new Error('無效的 UID：空字符串');
+            }
 
             const punchesQuery = query(ref(database, `punches/${sanitizedPunchUid}`), orderByChild('timestamp'), limitToLast(1));
             const punchesSnapshot = await get(punchesQuery);
             if (punchesSnapshot.exists()) {
                 const lastPunch = Object.values(punchesSnapshot.val())[0];
                 const lastPunchTime = new Date(lastPunch.timestamp);
-                const now = new Date();
-
-                if ((now - lastPunchTime) < 5 * 60 * 1000) {
-                    toast.error('重複打卡，請稍後再試！', { autoClose: 2000 });
-                    return;
+                if ((new Date() - lastPunchTime) < 5 * 60 * 1000) {
+                    throw new Error('重複打卡，請稍後再試');
                 }
             }
 
             const punchData = { timestamp: serverTimestamp(), type: punchType };
-            const punchRef = ref(database, `punches/${sanitizedPunchUid}/${new Date().toISOString().replace(/\W/g, '')}`);
+            const punchRef = ref(database, `punches/${uid}/${new Date().toISOString().replace(/\W/g, '')}`);
+
             await set(punchRef, punchData);
-            console.log("打卡記錄成功。");
+            toast.success(`${name} 打卡成功！`, { autoClose: 2000 });
 
-            let punchName = name;
-            if (detectedUid) {
-                const userRef = ref(database, `users/${sanitizedPunchUid}`);
-                const userSnapshot = await get(userRef);
-                if (userSnapshot.exists()) {
-                    punchName = userSnapshot.val().name;
-                }
-            }
+            await sendLineNotify(sanitizedPunchUid, name, punchType);
 
-            toast.success(`${punchName} 打卡成功！`, { autoClose: 2000 });
-
-            await sendLineNotify(sanitizedPunchUid, punchName, punchType);
-
-            // 清空 uid 和 name 輸入欄位
             setUid('');
             setName('');
             setIsPunchSuccessful(true);
             stopVideoStream();
 
         } catch (error) {
-            console.error("Error handling punch: ", error);
-            toast.error('打卡過程出現錯誤，請向管理員反映！', { autoClose: 2000 });
+            console.error("處理打卡時出錯: ", error);
+            toast.error(`打卡過程出現錯誤：${error.message}`, { autoClose: 2000 });
         }
     };
 
-    const handlePunchTypeChange = (type) => {
-        setPunchType(type);
-        localStorage.setItem('punchType', type);
-    };
-
-    // New functions for facial recognition
     const startVideo = async () => {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ video: {} });
             if (videoRef.current) {
                 videoRef.current.srcObject = stream;
                 streamRef.current = stream;
+                videoRef.current.onloadedmetadata = () => {
+                    videoRef.current.play();
+                    startFaceDetection();
+                };
             }
-            videoRef.current.onloadedmetadata = () => {
-                videoRef.current.play();
-                startFaceDetection();
-            };
         } catch (error) {
             console.error('Error accessing camera:', error);
             toast.error('無法訪問攝像頭');
@@ -267,9 +185,7 @@ export default function Punch() {
         faceapi.matchDimensions(canvas, displaySize);
 
         const detectFaces = async () => {
-            if (!video || video.paused || video.ended || isPunchSuccessful || !isCameraActive) {
-                return;
-            }
+            if (!video || video.paused || video.ended || isPunchSuccessful || !isCameraActive) return;
 
             const now = Date.now();
             if (now - lastScanTime.current > 1500 && !isProcessing.current) {
@@ -285,12 +201,11 @@ export default function Punch() {
 
                         const matchedUser = await matchFaceWithDatabase(resizedDetections[0].descriptor);
                         if (matchedUser) {
-                            // 只更新 UID 和姓名，不直接打卡
                             setUid(matchedUser.uid);
                             setName(matchedUser.name);
                             toast.success('人臉辨識成功，已填入 UID 和姓名', { autoClose: 1500 });
                             stopVideoStream();
-                            setIsPunchSuccessful(true);  // 確保面部識別完成
+                            setIsPunchSuccessful(true);
                         } else {
                             toast.error('未識別的用戶');
                         }
@@ -332,47 +247,10 @@ export default function Punch() {
         return null;
     };
 
-    const startFacialRecognition = () => {
-        if (isModelLoaded) {
-            setIsPunchSuccessful(false);  // 重置成功狀態
-            setIsCameraActive(true);
-        } else {
-            toast.error('模型尚未加載完成，請稍後再試');
-        }
-    };
+    if (isLoading) return <div className="flex min-h-screen flex-col items-center justify-between p-24"><h1 className="text-2xl font-bold">載入中...</h1></div>;
+    if (!isAuthorized) return <div className="flex min-h-screen flex-col items-center justify-between p-24"><h1 className="text-2xl font-bold">管理員須先授權！</h1></div>;
 
-    const resetPunch = () => {
-        setIsPunchSuccessful(false);
-        setIsCameraActive(false);
-        if (canvasRef.current) {
-            while (canvasRef.current.firstChild) {
-                canvasRef.current.removeChild(canvasRef.current.firstChild);
-            }
-        }
-    };
-
-    if (isLoading) {
-        return (
-            <div className="flex min-h-screen flex-col items-center justify-between p-24">
-                <div className="flex flex-col items-center justify-start h-1/3 w-full max-w-5xl font-mono text-sm text-center">
-                    <h1 className="text-2xl font-bold">載入中...</h1>
-                </div>
-            </div>
-        );
-    }
-
-    if (!isAuthorized) {
-        return (
-            <div className="flex min-h-screen flex-col items-center justify-between p-24">
-                <div className="flex flex-col items-center justify-start h-1/3 w-full max-w-5xl font-mono text-sm text-center">
-                    <h1 className="text-2xl font-bold">管理員須先授權！</h1>
-                </div>
-            </div>
-        );
-    }
-
-    return (
-        <>
+      return (
             <div className="min-h-screen py-10 px-4 flex flex-col items-start justify-start">
                 <div className="w-full max-w-xl mx-auto bg-white rounded-lg shadow-lg p-8">
                     <h1 className="text-2xl font-bold text-gray-700 text-center mb-4">【 打卡機 】</h1>
@@ -381,11 +259,13 @@ export default function Punch() {
                             {['上班', '下班'].map((type) => (
                                 <button
                                     key={type}
-                                    className={`px-6 py-3 rounded-lg transition-colors duration-300 ${punchType === type
-                                        ? 'bg-blue-600 text-white'
-                                        : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
-                                        }`}
-                                    onClick={() => handlePunchTypeChange(type)}
+                                    className={`px-6 py-3 rounded-lg transition-colors duration-300 ${
+                                        punchType === type ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+                                    }`}
+                                    onClick={() => {
+                                        setPunchType(type);
+                                        localStorage.setItem('punchType', type);
+                                    }}
                                 >
                                     {type}
                                 </button>
@@ -399,13 +279,16 @@ export default function Punch() {
                                     <QrReader
                                         key={Date.now()}
                                         delay={300}
-                                        onError={handleError}
+                                        onError={(err) => {
+                                            console.error("QR Reader Error: ", err);
+                                            toast.error(`掃描 QR Code 失敗: ${err}`, { autoClose: 2000 });
+                                        }}
                                         onScan={handleScan}
                                         style={{ width: '100%', height: '100%' }}
                                     />
                                 </div>
-                                <button
-                                    onClick={closeScanner}
+                                <button 
+                                    onClick={() => setScanning(false)} 
                                     className="w-full px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-300 mt-2"
                                 >
                                     關閉掃描器
@@ -417,8 +300,11 @@ export default function Punch() {
                                     <video ref={videoRef} width="720" height="560" autoPlay muted playsInline />
                                     <canvas ref={canvasRef} style={{ position: 'absolute', top: 0, left: 0 }} />
                                 </div>
-                                <button
-                                    onClick={closeFacialRecognition}
+                                <button 
+                                    onClick={() => {
+                                        setIsCameraActive(false);
+                                        stopVideoStream();
+                                    }} 
                                     className="w-full px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-300 mt-2"
                                 >
                                     關閉掃描器
@@ -426,14 +312,21 @@ export default function Punch() {
                             </div>
                         ) : (
                             <div className="flex flex-col space-y-4">
-                                <button
-                                    onClick={() => setScanning(true)}
+                                <button 
+                                    onClick={() => setScanning(true)} 
                                     className="px-6 py-3 bg-gradient-to-r from-blue-500 to-green-500 text-white rounded-lg hover:from-blue-700 hover:to-green-700 transition-transform transform hover:scale-105 shadow-lg"
                                 >
                                     QRcode 掃描
                                 </button>
-                                <button
-                                    onClick={startFacialRecognition}
+                                <button 
+                                    onClick={() => {
+                                        if (isModelLoaded) {
+                                            setIsPunchSuccessful(false);
+                                            setIsCameraActive(true);
+                                        } else {
+                                            toast.error('模型尚未加載完成，請稍後再試');
+                                        }
+                                    }} 
                                     className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-transform transform hover:scale-105 shadow-lg"
                                 >
                                     人臉辨識掃描
@@ -470,8 +363,7 @@ export default function Punch() {
                         </button>
                     </div>
                 </div>
+                <ToastContainer />
             </div>
-            <ToastContainer />
-        </>
-    );
-}
+        );
+      }

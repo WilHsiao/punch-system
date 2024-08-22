@@ -47,7 +47,7 @@ export default function Navigation() {
   }
 
   const allPunchSystemLinks = [
-    { href: '/punch-system/punch', text: '打卡機', requiredRoles: ['打卡機'] },
+    { href: '/punch-system/main-punch', text: '打卡機', requiredRoles: ['打卡機'] },
     { href: '/punch-system/punch-manual', text: '補打卡', requiredRoles: ['主管'] },
     { href: '/punch-system/query-punch-data', text: '查詢所有打卡資料', requiredRoles: ['主管'] },
     { href: '/punch-system/query-student-data', text: '查詢學生報到資料', requiredRoles: ['主管', '老師'] },
