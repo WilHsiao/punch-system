@@ -184,7 +184,13 @@ export default function Punch() {
 
         try {
             // Ensure punchUid is a string
-            const sanitizedPunchUid = String(punchUid);
+            const sanitizedPunchUid = String(punchUid).trim();
+
+            if (!sanitizedPunchUid) {
+                throw new Error('無效的 UID');
+            }
+
+            console.log('使用的 UID:', sanitizedPunchUid);
 
             const punchesQuery = query(ref(database, `punches/${sanitizedPunchUid}`), orderByChild('timestamp'), limitToLast(1));
             const punchesSnapshot = await get(punchesQuery);
@@ -202,7 +208,7 @@ export default function Punch() {
             const punchData = { timestamp: serverTimestamp(), type: punchType };
             const punchRef = ref(database, `punches/${sanitizedPunchUid}/${new Date().toISOString().replace(/\W/g, '')}`);
             await set(punchRef, punchData);
-            console.log("Punch recorded successfully.");
+            console.log("打卡記錄成功。");
 
             let punchName = name;
             if (detectedUid) {
