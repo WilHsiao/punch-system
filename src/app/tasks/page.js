@@ -123,7 +123,13 @@ export default function ViewTasksPage() {
       }
 
       if (!userDept) {
-            return <div className="container mx-auto px-4 py-8">請登入帳號以查看教材需求表</div>;
+            return (
+                  <div className="flex min-h-screen flex-col items-center justify-between p-24">
+                        <div className="flex flex-col items-center justify-start h-1/3 w-full max-w-5xl font-mono text-sm text-center">
+                              <h1 className="text-2xl font-bold">請登入帳號以查看分部需求表！</h1>
+                        </div>
+                  </div>
+            );
       }
 
       return (

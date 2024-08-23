@@ -170,7 +170,7 @@ export default function FaceRegistration() {
                     value={userName}
                     onChange={(e) => setUserName(e.target.value)}
                     placeholder="輸入用戶名"
-                    className="m-4 p-2 border rounded"
+                    className="p-3 border border-gray-300 text-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <button
                     onClick={captureAndRegister}
