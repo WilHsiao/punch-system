@@ -6,8 +6,10 @@ import { ref as storageRef, uploadString, getDownloadURL } from 'firebase/storag
 import * as faceapi from 'face-api.js';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useIamAccess } from '@/hooks/iam-access';
 
 export default function FaceRegistration() {
+    const { isAuthorized, isLoading } = useIamAccess(['打卡機'], []);
     const [isModelLoaded, setIsModelLoaded] = useState(false);
     const [userName, setUserName] = useState('');
     const [uploadedImage, setUploadedImage] = useState(null);
@@ -94,7 +96,7 @@ export default function FaceRegistration() {
         }
 
         setIsProcessing(true);
-        toast.info('正在處理，請稍候...', { autoClose: false });
+        toast.info('正在處理，請稍候...', { autoClose: 3000 });
 
         let imageElement;
         if (uploadedImage) {
@@ -160,6 +162,26 @@ export default function FaceRegistration() {
             setIsProcessing(false);
         }
     };
+
+    if (isLoading) {
+        return (
+              <div className="flex min-h-screen flex-col items-center justify-between p-24">
+                    <div className="flex flex-col items-center justify-start h-1/3 w-full max-w-5xl font-mono text-sm text-center">
+                          <h1 className="text-2xl font-bold">載入中...</h1>
+                    </div>
+              </div>
+        );
+  }
+
+  if (!isAuthorized) {
+        return (
+              <div className="flex min-h-screen flex-col items-center justify-between p-24">
+                    <div className="flex flex-col items-center justify-start h-1/3 w-full max-w-5xl font-mono text-sm text-center">
+                          <h1 className="text-2xl font-bold">管理員須先授權！</h1>
+                    </div>
+              </div>
+        );
+  }
 
     return (
         <div className="min-h-screen py-10 px-4 flex flex-col items-center justify-start">

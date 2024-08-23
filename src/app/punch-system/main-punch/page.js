@@ -247,8 +247,25 @@ export default function Punch() {
         return null;
     };
 
-    if (isLoading) return <div className="flex min-h-screen flex-col items-center justify-between p-24"><h1 className="text-2xl font-bold">載入中...</h1></div>;
-    if (!isAuthorized) return <div className="flex min-h-screen flex-col items-center justify-between p-24"><h1 className="text-2xl font-bold">管理員須先授權！</h1></div>;
+    if (isLoading) {
+        return (
+              <div className="flex min-h-screen flex-col items-center justify-between p-24">
+                    <div className="flex flex-col items-center justify-start h-1/3 w-full max-w-5xl font-mono text-sm text-center">
+                          <h1 className="text-2xl font-bold">載入中...</h1>
+                    </div>
+              </div>
+        );
+  }
+
+  if (!isAuthorized) {
+        return (
+              <div className="flex min-h-screen flex-col items-center justify-between p-24">
+                    <div className="flex flex-col items-center justify-start h-1/3 w-full max-w-5xl font-mono text-sm text-center">
+                          <h1 className="text-2xl font-bold">管理員須先授權！</h1>
+                    </div>
+              </div>
+        );
+  }
 
       return (
             <div className="min-h-screen py-10 px-4 flex flex-col items-start justify-start">
