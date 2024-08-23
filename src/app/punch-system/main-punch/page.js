@@ -331,7 +331,7 @@ export default function Punch() {
                             <div className="flex flex-col space-y-4">
                                 <button 
                                     onClick={() => setScanning(true)} 
-                                    className="px-6 py-3 bg-gradient-to-r from-blue-500 to-green-500 text-white rounded-lg hover:from-blue-700 hover:to-green-700 transition-transform transform hover:scale-105 shadow-lg"
+                                    className="px-6 py-3 bg-gradient-to-r from-blue-500 to-green-500 text-white rounded-lg hover:from-blue-700 hover:to-green-700 hover:scale-105 shadow-lg"
                                 >
                                     QRcode 掃描
                                 </button>
@@ -344,7 +344,7 @@ export default function Punch() {
                                             toast.error('模型尚未加載完成，請稍後再試');
                                         }
                                     }} 
-                                    className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-transform transform hover:scale-105 shadow-lg"
+                                    className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 hover:scale-105 shadow-lg"
                                 >
                                     人臉辨識掃描
                                 </button>
