@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { database, auth } from '@/config/firebaseConfig';
 import { ref, set, get } from 'firebase/database';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -12,8 +12,12 @@ export default function PunchManual() {
   const [uid, setUid] = useState('');
   const [name, setName] = useState('');
   const [date, setDate] = useState('');
+  const [displayDate, setDisplayDate] = useState('');
   const [time, setTime] = useState('');
+  const [displayTime, setDisplayTime] = useState('');
   const [punchType, setPunchType] = useState('');
+  const dateInputRef = useRef(null);
+  const timeInputRef = useRef(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -40,11 +44,15 @@ export default function PunchManual() {
   };
 
   const handleDateChange = (e) => {
-    setDate(e.target.value);
+    const newDate = e.target.value;
+    setDate(newDate);
+    setDisplayDate(formatDate(newDate));
   };
 
   const handleTimeChange = (e) => {
-    setTime(e.target.value);
+    const newTime = e.target.value;
+    setTime(newTime);
+    setDisplayTime(formatTime(newTime));
   };
 
   const handleManualPunch = async () => {
@@ -73,7 +81,9 @@ export default function PunchManual() {
         toast.success(`${userData.name} 的補打卡成功！`, { autoClose: 1000 });
         setUid('');
         setTime('');
+        setDisplayTime('');
         setDate('');
+        setDisplayDate('');
         setPunchType('');
       } else {
         toast.error('用戶不存在！', { autoClose: 1000 });
@@ -85,27 +95,31 @@ export default function PunchManual() {
   };
 
   if (isLoading) {
-    return <div className="flex min-h-screen items-center justify-center">
-      <h1 className="text-2xl font-bold">載入中...</h1>
-    </div>;
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-between p-24">
+        <div className="flex flex-col items-center justify-start h-1/3 w-full max-w-5xl font-mono text-sm text-center">
+          <h1 className="text-2xl font-bold">載入中...</h1>
+        </div>
+      </div>
+    );
   }
 
   if (!isAuthorized) {
-    return <div className="flex min-h-screen items-center justify-center">
-      <h1 className="text-2xl font-bold">管理員須先授權！</h1>
-    </div>;
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-between p-24">
+        <div className="flex flex-col items-center justify-start h-1/3 w-full max-w-5xl font-mono text-sm text-center">
+          <h1 className="text-2xl font-bold">管理員須先授權！</h1>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 py-6 flex flex-col justify-center sm:py-12">
-      <div className="relative py-3 sm:max-w-xl sm:mx-auto">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-300 to-blue-600 shadow-lg transform -skew-y-6 sm:skew-y-0 sm:-rotate-6 sm:rounded-3xl"></div>
-        <div className="relative px-4 py-10 bg-white shadow-lg sm:rounded-3xl sm:p-20">
-          <div className="max-w-md mx-auto">
-            <div className="text-center">
-              <h1 className="text-2xl font-semibold">【 補打卡 】</h1>
-            </div>
-            <div className="divide-y divide-gray-200">
+    <>
+      <div className="min-h-screen py-10 px-4 flex flex-col items-center justify-start">
+        <div className="w-full max-w-xl mx-auto bg-white rounded-lg shadow-lg p-8">
+          <h1 className="text-2xl font-bold text-gray-700 text-center pb-3">【 補打卡 】</h1>
+          <div className="divide-y divide-gray-200">
               <div className="py-8 text-base leading-6 space-y-4 text-gray-700 sm:text-lg sm:leading-7">
                 <div className="relative">
                   <input
@@ -127,7 +141,6 @@ export default function PunchManual() {
                     className="peer placeholder-transparent h-10 w-full border-b-2 border-gray-300 text-gray-900 focus:outline-none focus:border-blue-600 appearance-none"
                   />
                   <label htmlFor="date" className="absolute left-0 -top-3.5 text-gray-600 text-sm transition-all">日期</label>
-                  {date && <div className="mt-1 text-sm text-gray-500">{formatDate(date)}</div>}
                 </div>
                 <div className="relative">
                   <input
@@ -138,23 +151,22 @@ export default function PunchManual() {
                     className="peer placeholder-transparent h-10 w-full border-b-2 border-gray-300 text-gray-900 focus:outline-none focus:border-blue-600 appearance-none"
                   />
                   <label htmlFor="time" className="absolute left-0 -top-3.5 text-gray-600 text-sm transition-all">時間</label>
-                  {time && <div className="mt-1 text-sm text-gray-500">{formatTime(time)}</div>}
                 </div>
                 <div className="relative">
-                  <div className="flex justify-between">
-                    <button
-                      onClick={() => setPunchType('上班')}
-                      className={`px-4 py-2 rounded ${punchType === '上班' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'}`}
-                    >
-                      上班
-                    </button>
-                    <button
-                      onClick={() => setPunchType('下班')}
-                      className={`px-4 py-2 rounded ${punchType === '下班' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'}`}
-                    >
-                      下班
-                    </button>
-                  </div>
+                <div className="mb-3 w-full flex flex-col items-center">
+            <label className="text-gray-700 font-bold mb-2">打卡類型</label>
+            <div className="flex space-x-4">
+              {['上班', '下班'].map((type) => (
+                <button
+                  key={type}
+                  className={`px-4 py-2 rounded ${punchType === type ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-700'}`}
+                  onClick={() => setPunchType(type)}
+                >
+                  {type}
+                </button>
+              ))}
+            </div>
+          </div>
                 </div>
                 <div className="relative">
                   <button
@@ -166,10 +178,9 @@ export default function PunchManual() {
                 </div>
               </div>
             </div>
-          </div>
         </div>
       </div>
       <ToastContainer />
-    </div>
+    </>
   );
 }
