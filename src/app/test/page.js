@@ -1,5 +1,3 @@
-// */punch-system/punch-manual
-
 'use client';
 import { useState, useEffect } from 'react';
 import { database, auth } from '@/config/firebaseConfig';
@@ -56,6 +54,7 @@ export default function PunchManual() {
         setUid('');
         setTime('');
         setDate('');
+        setPunchType('');
       } else {
         toast.error('用戶不存在！', { autoClose: 1000 });
       }
@@ -87,45 +86,68 @@ export default function PunchManual() {
 
   return (
     <>
-      <div className="min-h-screen py-10 px-4 flex flex-col items-start justify-start">
-        <div className="w-full max-w-xl mx-auto bg-white rounded-lg shadow-lg p-8">
-          <h1 className="text-2xl font-bold text-gray-700 text-center pb-3">【 補打卡 】</h1>
-          {[
-            { label: 'UID', type: 'text', value: uid, onChange: setUid, placeholder: '請輸入用戶 UID' },
-            { label: '日期', type: 'date', value: date, onChange: setDate },
-            { label: '時間', type: 'time', value: time, onChange: setTime }
-          ].map(({ label, type, value, onChange, placeholder }, idx) => (
-            <div key={idx} className="mb-3 w-full flex items-center">
-              <h2 className="w-1/5 text-left text-gray-700 font-bold pr-4">{label}</h2>
+      <div className="min-h-screen py-10 px-4 flex flex-col items-center justify-start bg-gray-100">
+        <div className="w-full max-w-md mx-auto bg-white rounded-lg shadow-lg p-8">
+          <h1 className="text-2xl font-bold text-gray-700 text-center pb-6">【 補打卡 】</h1>
+          <div className="space-y-4">
+            <div className="flex flex-col">
+              <label htmlFor="uid" className="text-sm font-medium text-gray-700 mb-1">UID</label>
               <input
-                type={type}
-                value={value}
-                onChange={(e) => onChange(e.target.value)}
-                placeholder={placeholder}
-                className="p-2 border border-gray-300 text-gray-700 rounded w-full"
+                type="text"
+                id="uid"
+                value={uid}
+                onChange={(e) => setUid(e.target.value)}
+                placeholder="請輸入用戶 UID"
+                className="p-2 border border-gray-300 rounded-md w-full"
               />
             </div>
-          ))}
-          <div className="mb-3 w-full flex flex-col items-center">
-            <label className="text-gray-700 font-bold mb-2">打卡類型</label>
-            <div className="flex space-x-4">
-              {['上班', '下班'].map((type) => (
-                <button
-                  key={type}
-                  className={`px-4 py-2 rounded ${punchType === type ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-700'}`}
-                  onClick={() => setPunchType(type)}
-                >
-                  {type}
-                </button>
-              ))}
+            <div className="flex flex-col">
+              <label htmlFor="date" className="text-sm font-medium text-gray-700 mb-1">日期</label>
+              <div className="relative">
+                <input
+                  type="date"
+                  id="date"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  className="p-2 border border-gray-300 rounded-md w-full pr-10"
+                />
+                <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">&#128197;</span>
+              </div>
             </div>
+            <div className="flex flex-col">
+              <label htmlFor="time" className="text-sm font-medium text-gray-700 mb-1">時間</label>
+              <div className="relative">
+                <input
+                  type="time"
+                  id="time"
+                  value={time}
+                  onChange={(e) => setTime(e.target.value)}
+                  className="p-2 border border-gray-300 rounded-md w-full pr-10"
+                />
+                <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">&#128339;</span>
+              </div>
+            </div>
+            <div className="flex flex-col">
+              <label className="text-sm font-medium text-gray-700 mb-2">打卡類型</label>
+              <div className="flex space-x-4">
+                {['上班', '下班'].map((type) => (
+                  <button
+                    key={type}
+                    className={`flex-1 py-2 px-4 rounded-md ${punchType === type ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'}`}
+                    onClick={() => setPunchType(type)}
+                  >
+                    {type}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <button
+              onClick={handleManualPunch}
+              className="w-full bg-blue-500 text-white p-3 rounded-md font-bold hover:bg-blue-600 transition duration-300"
+            >
+              提交補打卡
+            </button>
           </div>
-          <button
-            onClick={handleManualPunch}
-            className="bg-blue-500 text-white p-2 rounded w-full font-bold mt-2"
-          >
-            提交補打卡
-          </button>
         </div>
       </div>
       <ToastContainer />
