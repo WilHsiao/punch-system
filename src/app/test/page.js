@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { database, auth } from '@/config/firebaseConfig';
 import { ref, set, get } from 'firebase/database';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -12,8 +12,10 @@ export default function PunchManual() {
   const [uid, setUid] = useState('');
   const [name, setName] = useState('');
   const [date, setDate] = useState('');
+  const [displayDate, setDisplayDate] = useState('');
   const [time, setTime] = useState('');
   const [punchType, setPunchType] = useState('');
+  const dateInputRef = useRef(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -26,6 +28,22 @@ export default function PunchManual() {
 
     return () => unsubscribe();
   }, []);
+
+  const formatDate = (dateString) => {
+    if (!dateString) return '';
+    const [year, month, day] = dateString.split('-');
+    return `${year}年${month}月${day}日`;
+  };
+
+  const handleDateChange = (e) => {
+    const newDate = e.target.value;
+    setDate(newDate);
+    setDisplayDate(formatDate(newDate));
+  };
+
+  const handleDisplayDateClick = () => {
+    dateInputRef.current.showPicker();
+  };
 
   const handleManualPunch = async () => {
     if (!uid || !date || !time || !punchType) {
@@ -54,6 +72,7 @@ export default function PunchManual() {
         setUid('');
         setTime('');
         setDate('');
+        setDisplayDate('');
         setPunchType('');
       } else {
         toast.error('用戶不存在！', { autoClose: 1000 });
@@ -105,11 +124,20 @@ export default function PunchManual() {
               <label htmlFor="date" className="text-sm font-medium text-gray-700 mb-1">日期</label>
               <div className="relative">
                 <input
+                  type="text"
+                  value={displayDate}
+                  onClick={handleDisplayDateClick}
+                  readOnly
+                  placeholder="YYYY年MM月DD日"
+                  className="p-2 border border-gray-300 rounded-md w-full pr-10 bg-white"
+                />
+                <input
+                  ref={dateInputRef}
                   type="date"
                   id="date"
                   value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  className="p-2 border border-gray-300 rounded-md w-full pr-10"
+                  onChange={handleDateChange}
+                  className="absolute inset-0 opacity-0 cursor-pointer"
                 />
                 <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">&#128197;</span>
               </div>
