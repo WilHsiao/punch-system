@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { database, auth } from '@/config/firebaseConfig';
 import { ref, set, get } from 'firebase/database';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -12,12 +12,8 @@ export default function PunchManual() {
   const [uid, setUid] = useState('');
   const [name, setName] = useState('');
   const [date, setDate] = useState('');
-  const [displayDate, setDisplayDate] = useState('');
   const [time, setTime] = useState('');
-  const [displayTime, setDisplayTime] = useState('');
   const [punchType, setPunchType] = useState('');
-  const dateInputRef = useRef(null);
-  const timeInputRef = useRef(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -44,15 +40,11 @@ export default function PunchManual() {
   };
 
   const handleDateChange = (e) => {
-    const newDate = e.target.value;
-    setDate(newDate);
-    setDisplayDate(formatDate(newDate));
+    setDate(e.target.value);
   };
 
   const handleTimeChange = (e) => {
-    const newTime = e.target.value;
-    setTime(newTime);
-    setDisplayTime(formatTime(newTime));
+    setTime(e.target.value);
   };
 
   const handleManualPunch = async () => {
@@ -81,9 +73,7 @@ export default function PunchManual() {
         toast.success(`${userData.name} 的補打卡成功！`, { autoClose: 1000 });
         setUid('');
         setTime('');
-        setDisplayTime('');
         setDate('');
-        setDisplayDate('');
         setPunchType('');
       } else {
         toast.error('用戶不存在！', { autoClose: 1000 });
@@ -95,108 +85,91 @@ export default function PunchManual() {
   };
 
   if (isLoading) {
-    return (
-      <div className="flex min-h-screen flex-col items-center justify-between p-24">
-        <div className="flex flex-col items-center justify-start h-1/3 w-full max-w-5xl font-mono text-sm text-center">
-          <h1 className="text-2xl font-bold">載入中...</h1>
-        </div>
-      </div>
-    );
+    return <div className="flex min-h-screen items-center justify-center">
+      <h1 className="text-2xl font-bold">載入中...</h1>
+    </div>;
   }
 
   if (!isAuthorized) {
-    return (
-      <div className="flex min-h-screen flex-col items-center justify-between p-24">
-        <div className="flex flex-col items-center justify-start h-1/3 w-full max-w-5xl font-mono text-sm text-center">
-          <h1 className="text-2xl font-bold">管理員須先授權！</h1>
-        </div>
-      </div>
-    );
+    return <div className="flex min-h-screen items-center justify-center">
+      <h1 className="text-2xl font-bold">管理員須先授權！</h1>
+    </div>;
   }
 
   return (
-    <>
-      <div className="min-h-screen py-10 px-4 flex flex-col items-center justify-start bg-gray-100">
-        <div className="w-full max-w-md mx-auto bg-white rounded-lg shadow-lg p-8">
-          <h1 className="text-2xl font-bold text-gray-700 text-center pb-6">【 補打卡 】</h1>
-          <div className="space-y-4">
-            <div className="flex flex-col">
-              <label htmlFor="uid" className="text-sm font-medium text-gray-700 mb-1">UID</label>
-              <input
-                type="text"
-                id="uid"
-                value={uid}
-                onChange={(e) => setUid(e.target.value)}
-                placeholder="請輸入用戶 UID"
-                className="p-2 border border-gray-300 rounded-md w-full"
-              />
+    <div className="min-h-screen bg-gray-100 py-6 flex flex-col justify-center sm:py-12">
+      <div className="relative py-3 sm:max-w-xl sm:mx-auto">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-300 to-blue-600 shadow-lg transform -skew-y-6 sm:skew-y-0 sm:-rotate-6 sm:rounded-3xl"></div>
+        <div className="relative px-4 py-10 bg-white shadow-lg sm:rounded-3xl sm:p-20">
+          <div className="max-w-md mx-auto">
+            <div className="text-center">
+              <h1 className="text-2xl font-semibold">【 補打卡 】</h1>
             </div>
-            <div className="flex flex-col">
-              <label htmlFor="date" className="text-sm font-medium text-gray-700 mb-1">日期</label>
-              <div className="relative">
-                <input
-                  type="date"
-                  id="date"
-                  ref={dateInputRef}
-                  value={date}
-                  onChange={handleDateChange}
-                  className="p-2 border border-gray-300 rounded-md w-full pr-10"
-                />
-                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                  <span className="text-gray-400">&#128197;</span>
+            <div className="divide-y divide-gray-200">
+              <div className="py-8 text-base leading-6 space-y-4 text-gray-700 sm:text-lg sm:leading-7">
+                <div className="relative">
+                  <input
+                    type="text"
+                    id="uid"
+                    value={uid}
+                    onChange={(e) => setUid(e.target.value)}
+                    className="peer placeholder-transparent h-10 w-full border-b-2 border-gray-300 text-gray-900 focus:outline-none focus:border-blue-600"
+                    placeholder="請輸入用戶 UID"
+                  />
+                  <label htmlFor="uid" className="absolute left-0 -top-3.5 text-gray-600 text-sm peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-440 peer-placeholder-shown:top-2 transition-all peer-focus:-top-3.5 peer-focus:text-gray-600 peer-focus:text-sm">UID</label>
                 </div>
-              </div>
-              {displayDate && (
-                <div className="mt-1 text-sm text-gray-500">
-                  選擇的日期: {displayDate}
+                <div className="relative">
+                  <input
+                    type="date"
+                    id="date"
+                    value={date}
+                    onChange={handleDateChange}
+                    className="peer placeholder-transparent h-10 w-full border-b-2 border-gray-300 text-gray-900 focus:outline-none focus:border-blue-600 appearance-none"
+                  />
+                  <label htmlFor="date" className="absolute left-0 -top-3.5 text-gray-600 text-sm transition-all">日期</label>
+                  {date && <div className="mt-1 text-sm text-gray-500">{formatDate(date)}</div>}
                 </div>
-              )}
-            </div>
-            <div className="flex flex-col">
-              <label htmlFor="time" className="text-sm font-medium text-gray-700 mb-1">時間</label>
-              <div className="relative">
-                <input
-                  type="time"
-                  id="time"
-                  ref={timeInputRef}
-                  value={time}
-                  onChange={handleTimeChange}
-                  className="p-2 border border-gray-300 rounded-md w-full pr-10"
-                />
-                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                  <span className="text-gray-400">&#128339;</span>
+                <div className="relative">
+                  <input
+                    type="time"
+                    id="time"
+                    value={time}
+                    onChange={handleTimeChange}
+                    className="peer placeholder-transparent h-10 w-full border-b-2 border-gray-300 text-gray-900 focus:outline-none focus:border-blue-600 appearance-none"
+                  />
+                  <label htmlFor="time" className="absolute left-0 -top-3.5 text-gray-600 text-sm transition-all">時間</label>
+                  {time && <div className="mt-1 text-sm text-gray-500">{formatTime(time)}</div>}
                 </div>
-              </div>
-              {displayTime && (
-                <div className="mt-1 text-sm text-gray-500">
-                  選擇的時間: {displayTime}
+                <div className="relative">
+                  <div className="flex justify-between">
+                    <button
+                      onClick={() => setPunchType('上班')}
+                      className={`px-4 py-2 rounded ${punchType === '上班' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'}`}
+                    >
+                      上班
+                    </button>
+                    <button
+                      onClick={() => setPunchType('下班')}
+                      className={`px-4 py-2 rounded ${punchType === '下班' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'}`}
+                    >
+                      下班
+                    </button>
+                  </div>
                 </div>
-              )}
-            </div>
-            <div className="flex flex-col">
-              <label className="text-sm font-medium text-gray-700 mb-2">打卡類型</label>
-              <div className="flex space-x-4">
-                {['上班', '下班'].map((type) => (
+                <div className="relative">
                   <button
-                    key={type}
-                    className={`flex-1 py-2 px-4 rounded-md ${punchType === type ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'}`}
-                    onClick={() => setPunchType(type)}
+                    onClick={handleManualPunch}
+                    className="bg-blue-500 text-white rounded-md px-2 py-1 w-full"
                   >
-                    {type}
+                    提交補打卡
                   </button>
-                ))}
+                </div>
               </div>
             </div>
-            <button
-              onClick={handleManualPunch}
-              className="w-full bg-blue-500 text-white p-3 rounded-md font-bold hover:bg-blue-600 transition duration-300"
-            >
-              提交補打卡
-            </button>
           </div>
         </div>
       </div>
       <ToastContainer />
-    </>
+    </div>
   );
 }
