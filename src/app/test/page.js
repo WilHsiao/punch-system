@@ -14,8 +14,10 @@ export default function PunchManual() {
   const [date, setDate] = useState('');
   const [displayDate, setDisplayDate] = useState('');
   const [time, setTime] = useState('');
+  const [displayTime, setDisplayTime] = useState('');
   const [punchType, setPunchType] = useState('');
   const dateInputRef = useRef(null);
+  const timeInputRef = useRef(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -35,14 +37,22 @@ export default function PunchManual() {
     return `${year}年${month}月${day}日`;
   };
 
+  const formatTime = (timeString) => {
+    if (!timeString) return '';
+    const [hours, minutes] = timeString.split(':');
+    return `${hours}時${minutes}分`;
+  };
+
   const handleDateChange = (e) => {
     const newDate = e.target.value;
     setDate(newDate);
     setDisplayDate(formatDate(newDate));
   };
 
-  const handleDisplayDateClick = () => {
-    dateInputRef.current.showPicker();
+  const handleTimeChange = (e) => {
+    const newTime = e.target.value;
+    setTime(newTime);
+    setDisplayTime(formatTime(newTime));
   };
 
   const handleManualPunch = async () => {
@@ -71,6 +81,7 @@ export default function PunchManual() {
         toast.success(`${userData.name} 的補打卡成功！`, { autoClose: 1000 });
         setUid('');
         setTime('');
+        setDisplayTime('');
         setDate('');
         setDisplayDate('');
         setPunchType('');
@@ -124,23 +135,22 @@ export default function PunchManual() {
               <label htmlFor="date" className="text-sm font-medium text-gray-700 mb-1">日期</label>
               <div className="relative">
                 <input
-                  type="text"
-                  value={displayDate}
-                  onClick={handleDisplayDateClick}
-                  readOnly
-                  placeholder="YYYY年MM月DD日"
-                  className="p-2 border border-gray-300 rounded-md w-full pr-10 bg-white"
-                />
-                <input
-                  ref={dateInputRef}
                   type="date"
                   id="date"
+                  ref={dateInputRef}
                   value={date}
                   onChange={handleDateChange}
-                  className="absolute inset-0 opacity-0 cursor-pointer"
+                  className="p-2 border border-gray-300 rounded-md w-full pr-10"
                 />
-                <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">&#128197;</span>
+                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                  <span className="text-gray-400">&#128197;</span>
+                </div>
               </div>
+              {displayDate && (
+                <div className="mt-1 text-sm text-gray-500">
+                  選擇的日期: {displayDate}
+                </div>
+              )}
             </div>
             <div className="flex flex-col">
               <label htmlFor="time" className="text-sm font-medium text-gray-700 mb-1">時間</label>
@@ -148,12 +158,20 @@ export default function PunchManual() {
                 <input
                   type="time"
                   id="time"
+                  ref={timeInputRef}
                   value={time}
-                  onChange={(e) => setTime(e.target.value)}
+                  onChange={handleTimeChange}
                   className="p-2 border border-gray-300 rounded-md w-full pr-10"
                 />
-                <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">&#128339;</span>
+                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                  <span className="text-gray-400">&#128339;</span>
+                </div>
               </div>
+              {displayTime && (
+                <div className="mt-1 text-sm text-gray-500">
+                  選擇的時間: {displayTime}
+                </div>
+              )}
             </div>
             <div className="flex flex-col">
               <label className="text-sm font-medium text-gray-700 mb-2">打卡類型</label>
