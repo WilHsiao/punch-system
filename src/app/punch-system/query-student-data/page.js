@@ -183,7 +183,7 @@ export default function QueryPunch() {
                     {punches.length > 0 && (
                         <div className="w-full mt-4">
                             <div className="overflow-x-auto">
-                                <table className="min-w-full bg-white rounded-lg shadow-lg">
+                                <table className="min-w-full bg-white rounded-lg shadow-lg table-mobile">
                                     <thead>
                                         <tr className="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
                                             <th className="py-3 px-6 text-left">日期和時間</th>

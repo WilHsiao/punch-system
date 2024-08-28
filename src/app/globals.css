@@ -59,3 +59,9 @@ body {
     height: auto;
   }
 }
+
+@media (max-width: 534px) {
+  .table-mobile {
+    min-width: 28rem;
+  }
+}
