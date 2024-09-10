@@ -124,7 +124,7 @@ export default function QueryPunch() {
                                 id="uid"
                                 value={uid}
                                 onChange={(e) => setUid(e.target.value)}
-                                placeholder="輸入 UID"
+                                placeholder="請輸入UID"
                                 className="p-3 border border-gray-300 text-gray-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
                             <button
