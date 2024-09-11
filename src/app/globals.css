@@ -42,6 +42,8 @@ body {
   background-color: #1f2937; /* bg-gray-800 */
   transform: translateX(-100%);
   transition: transform 0.3s ease-in-out;
+  z-index: 1;
+  overflow-y: auto;
 }
 
 .nav-mobile.open {
@@ -55,5 +57,11 @@ body {
     max-width: none;
     width: auto;
     height: auto;
+  }
+}
+
+@media (max-width: 534px) {
+  .table-mobile {
+    min-width: 28rem;
   }
 }

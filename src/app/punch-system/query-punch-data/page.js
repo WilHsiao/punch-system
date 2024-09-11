@@ -1,7 +1,7 @@
 // */punch-system/query-punch-data
 
 'use client';
-import { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { database } from '@/config/firebaseConfig';
 import { get, ref, query, orderByChild } from 'firebase/database';
 import { ToastContainer, toast } from 'react-toastify';
@@ -14,23 +14,34 @@ const QrReader = dynamic(() => import('react-qr-scanner'), { ssr: false });
 export default function QueryPunch() {
     const { isAuthorized, isLoading } = useIamAccess();
     const [punches, setPunches] = useState([]);
-    const [scanning, setScanning] = useState(true);
-    const [lastScanned, setLastScanned] = useState(null);
-    const [inputUid, setInputUid] = useState('');
+    const [uid, setUid] = useState('');
+    const [scanning, setScanning] = useState(false);
 
-    const handleScan = async (data) => {
-        if (data && data !== lastScanned) {
-            const uid = typeof data === 'object' ? data.text : data;
-            setLastScanned(data);
+    const handleScan = useCallback(async (data) => {
+        if (data) {
             setScanning(false);
-            await queryPunches(uid);
-        }
-    };
+            const scannedUid = String(data.text);
+            setUid(scannedUid);
 
-    const queryPunches = async (uid) => {
+            try {
+                const userRef = ref(database, `users/${scannedUid}`);
+                const userSnapshot = await get(userRef);
+                if (userSnapshot.exists()) {
+                    toast.success('QR code 辨識成功，已填入 UID', { autoClose: 1500 });
+                } else {
+                    toast.error('用戶不存在！', { autoClose: 2000 });
+                }
+            } catch (error) {
+                console.error("Error fetching user data: ", error);
+                toast.error('獲取用戶數據時出錯', { autoClose: 1500 });
+            }
+        }
+    }, []);
+
+    const queryPunches = async (uidToQuery) => {
         try {
             const punchesQuery = query(
-                ref(database, `punches/${uid}`),
+                ref(database, `punches/${uidToQuery}`),
                 orderByChild('timestamp'),
             );
 
@@ -47,26 +58,17 @@ export default function QueryPunch() {
             }
         } catch (error) {
             console.error("Error querying punches: ", error);
-            toast.error('查詢過程出現錯誤', { autoClose: 2000 });
+            toast.error('查詢過程出現錯誤', { autoClose: 1500 });
             setPunches([]);
         }
     };
 
-    const handleError = (err) => {
-        console.error(err);
-        toast.error('QR碼掃描錯誤', { autoClose: 2000 });
-    };
-
-    const handleInputChange = (e) => {
-        setInputUid(e.target.value);
-    };
-
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (inputUid.trim()) {
+        if (uid.trim()) {
             setScanning(false);
-            queryPunches(inputUid.trim());
-            setInputUid('');
+            queryPunches(uid.trim());
+            toast.success('查詢成功！', { autoClose: 1500 });
         } else {
             toast.error('請輸入有效的 UID', { autoClose: 2000 });
         }
@@ -97,52 +99,73 @@ export default function QueryPunch() {
             <div className="min-h-screen py-10 px-4 flex flex-col items-start justify-start">
                 <div className="w-full max-w-xl mx-auto bg-white rounded-lg shadow-lg p-8">
                     <h1 className="text-2xl font-bold text-gray-700 text-center mb-4">【 查詢打卡記錄 】</h1>
-
-                    {/* UID 輸入區塊 */}
                     <form onSubmit={handleSubmit} className="mb-4">
                         <div className="flex items-center">
                             <input
                                 type="text"
-                                value={inputUid}
-                                onChange={handleInputChange}
-                                placeholder="輸入 UID"
-                                className="flex-grow p-2 border rounded-l"
+                                id="uid"
+                                value={uid}
+                                onChange={(e) => setUid(e.target.value)}
+                                placeholder="請輸入UID"
+                                className="p-3 border border-gray-300 text-gray-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
                             <button
                                 type="submit"
-                                className="bg-blue-500 text-white p-2 rounded-r"
+                                className="bg-blue-500 text-white p-3 rounded-lg flex items-center justify-center"
+                                aria-label="查詢"
                             >
-                                查詢
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="24"
+                                    height="24"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                >
+                                    <circle cx="11" cy="11" r="8" />
+                                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                                </svg>
                             </button>
                         </div>
                     </form>
-
-                    {/* QrCode 輸入區塊 */}
                     {scanning ? (
-                        <div className="w-full">
-                            <QrReader
-                                delay={300}
-                                onError={handleError}
-                                onScan={handleScan}
-                                style={{ width: '100%' }}
-                            />
+                        <div className='w-full'>
+                            <div className="w-full h-full">
+                                <QrReader
+                                    key={Date.now()}
+                                    delay={300}
+                                    onError={(err) => {
+                                        console.error("QR Reader Error: ", err);
+                                        toast.error(`掃描 QR Code 失敗: ${err}`, { autoClose: 2000 });
+                                    }}
+                                    onScan={handleScan}
+                                    style={{ width: '100%', height: '100%' }}
+                                />
+                            </div>
+                            <button
+                                onClick={() => setScanning(false)}
+                                className="w-full px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-300 mt-2"
+                            >
+                                關閉掃描器
+                            </button>
                         </div>
                     ) : (
-                        <button
-                            onClick={() => {
-                                setScanning(true);
-                                setLastScanned(null);
-                                setInputUid('');
-                            }}
-                            className="bg-green-500 text-white p-2 rounded w-full font-bold mt-2"
-                        >
-                            重新掃描
-                        </button>
+                        <div className="flex flex-col space-y-4">
+                            <button
+                                onClick={() => setScanning(true)}
+                                className="px-6 py-3 bg-gradient-to-r from-blue-500 to-green-500 text-white rounded-lg hover:from-blue-700 hover:to-green-700 hover:scale-105 shadow-lg"
+                            >
+                                QRcode 掃描
+                            </button>
+                        </div>
                     )}
                     {punches.length > 0 && (
                         <div className="w-full mt-4">
                             <div className="overflow-x-auto">
-                                <table className="min-w-full bg-white rounded-lg shadow-lg">
+                                <table className="min-w-full bg-white rounded-lg shadow-lg table-mobile">
                                     <thead>
                                         <tr className="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
                                             <th className="py-3 px-6 text-left">日期和時間</th>
@@ -155,7 +178,7 @@ export default function QueryPunch() {
                                             const prevPunch = index > 0 ? punches[index - 1] : null;
                                             const isOrderIncorrect = prevPunch && prevPunch.type === punch.type;
                                             return (
-                                                <>
+                                                <React.Fragment key={punch.timestamp}>
                                                     {isOrderIncorrect && (
                                                         <tr className="bg-yellow-100">
                                                             <td colSpan="3" className="py-2 px-6 text-center text-yellow-700">
@@ -171,7 +194,7 @@ export default function QueryPunch() {
                                                         <td className="py-3 px-6 text-left">{punch.type}</td>
                                                         <td className="py-3 px-6 text-left">{punch.tag}</td>
                                                     </tr>
-                                                </>
+                                                </React.Fragment>
                                             );
                                         })}
                                     </tbody>

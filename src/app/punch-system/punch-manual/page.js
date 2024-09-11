@@ -1,23 +1,23 @@
 // */punch-system/punch-manual
 
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { database, auth } from '@/config/firebaseConfig';
 import { ref, set, get } from 'firebase/database';
 import { onAuthStateChanged } from 'firebase/auth';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useIamAccess } from '@/hooks/iam-access';
-// import PasswordUnlock from '@/hooks/page-pw-unlock';
 
 export default function PunchManual() {
   const { isAuthorized, isLoading } = useIamAccess();
   const [uid, setUid] = useState('');
   const [name, setName] = useState('');
   const [date, setDate] = useState('');
+  const [displayDate, setDisplayDate] = useState('');
   const [time, setTime] = useState('');
+  const [displayTime, setDisplayTime] = useState('');
   const [punchType, setPunchType] = useState('');
-  const [unlocked, setUnlocked] = useState(false); // 用於控制是否解鎖
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -30,6 +30,16 @@ export default function PunchManual() {
 
     return () => unsubscribe();
   }, []);
+
+  const handleDateChange = (e) => {
+    const newDate = e.target.value;
+    setDate(newDate);
+  };
+
+  const handleTimeChange = (e) => {
+    const newTime = e.target.value;
+    setTime(newTime);
+  };
 
   const handleManualPunch = async () => {
     if (!uid || !date || !time || !punchType) {
@@ -57,7 +67,10 @@ export default function PunchManual() {
         toast.success(`${userData.name} 的補打卡成功！`, { autoClose: 1000 });
         setUid('');
         setTime('');
+        setDisplayTime('');
         setDate('');
+        setDisplayDate('');
+        setPunchType('');
       } else {
         toast.error('用戶不存在！', { autoClose: 1000 });
       }
@@ -87,51 +100,71 @@ export default function PunchManual() {
     );
   }
 
-  // if (!unlocked) {
-  //   return <PasswordUnlock onUnlock={() => setUnlocked(true)} />; // 顯示密碼解鎖頁面
-  // }
-
   return (
     <>
-      <div className="min-h-screen py-10 px-4 flex flex-col items-start justify-start">
+      <div className="min-h-screen py-10 px-4 flex flex-col items-center justify-start">
         <div className="w-full max-w-xl mx-auto bg-white rounded-lg shadow-lg p-8">
           <h1 className="text-2xl font-bold text-gray-700 text-center pb-3">【 補打卡 】</h1>
-          {[
-            { label: 'UID', type: 'text', value: uid, onChange: setUid, placeholder: '請輸入用戶 UID' },
-            { label: '日期', type: 'date', value: date, onChange: setDate },
-            { label: '時間', type: 'time', value: time, onChange: setTime }
-          ].map(({ label, type, value, onChange, placeholder }, idx) => (
-            <div key={idx} className="mb-3 w-full flex items-center">
-              <h2 className="w-1/5 text-left text-gray-700 font-bold pr-4">{label}</h2>
-              <input
-                type={type}
-                value={value}
-                onChange={(e) => onChange(e.target.value)}
-                placeholder={placeholder}
-                className="p-2 border border-gray-300 text-gray-700 rounded w-full"
-              />
-            </div>
-          ))}
-          <div className="mb-3 w-full flex flex-col items-center">
-            <label className="text-gray-700 font-bold mb-2">打卡類型</label>
-            <div className="flex space-x-4">
-              {['上班', '下班'].map((type) => (
+          <div className="divide-y divide-gray-200">
+            <div className="py-8 text-base leading-6 space-y-4 text-gray-700 sm:text-lg sm:leading-7">
+              <div className="relative">
+              <label htmlFor="uid" className="absolute left-0 -top-3.5 text-gray-600 text-sm peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-440 peer-placeholder-shown:top-2 transition-all peer-focus:-top-3.5 peer-focus:text-gray-600 peer-focus:text-sm">UID</label>
+                <input
+                  type="text"
+                  id="uid"
+                  value={uid}
+                  onChange={(e) => setUid(e.target.value)}
+                  className="peer placeholder-transparent h-10 w-full border-b-2 border-gray-300 text-gray-900 focus:outline-none focus:border-blue-600"
+                  placeholder="請輸入用戶 UID"
+                />
+                
+              </div>
+              <div className="relative">
+                <input
+                  type="date"
+                  id="date"
+                  value={date}
+                  onChange={handleDateChange}
+                  className="peer placeholder-transparent h-10 w-full border-b-2 border-gray-300 text-gray-900 focus:outline-none focus:border-blue-600 appearance-none"
+                />
+                <label htmlFor="date" className="absolute left-0 -top-3.5 text-gray-600 text-sm transition-all">日期</label>
+              </div>
+              <div className="relative">
+                <input
+                  type="time"
+                  id="time"
+                  value={time}
+                  onChange={handleTimeChange}
+                  className="peer placeholder-transparent h-10 w-full border-b-2 border-gray-300 text-gray-900 focus:outline-none focus:border-blue-600 appearance-none"
+                />
+                <label htmlFor="time" className="absolute left-0 -top-3.5 text-gray-600 text-sm transition-all">時間</label>
+              </div>
+              <div className="relative">
+                <div className="mb-3 w-full flex flex-col items-center">
+                  <label className="text-gray-700 font-bold mb-2">打卡類型</label>
+                  <div className="flex space-x-4">
+                    {['上班', '下班'].map((type) => (
+                      <button
+                        key={type}
+                        className={`px-4 py-2 rounded ${punchType === type ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-700'}`}
+                        onClick={() => setPunchType(type)}
+                      >
+                        {type}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="relative">
                 <button
-                  key={type}
-                  className={`px-4 py-2 rounded ${punchType === type ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-700'}`}
-                  onClick={() => setPunchType(type)}
+                  onClick={handleManualPunch}
+                  className="bg-blue-500 text-white rounded-md px-2 py-1 w-full"
                 >
-                  {type}
+                  提交補打卡
                 </button>
-              ))}
+              </div>
             </div>
           </div>
-          <button
-            onClick={handleManualPunch}
-            className="bg-blue-500 text-white p-2 rounded w-full font-bold mt-2"
-          >
-            提交補打卡
-          </button>
         </div>
       </div>
       <ToastContainer />

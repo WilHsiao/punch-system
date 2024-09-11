@@ -1,7 +1,7 @@
 // */punch-system/query-self-data
 
 'use client';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { auth, database } from '@/config/firebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
 import { get, ref, query, orderByChild } from 'firebase/database';
@@ -59,14 +59,14 @@ export default function QueryPunch() {
                     <h1 className="text-2xl font-bold text-gray-700 text-center mb-6">【 我的紀錄 】</h1>
                     <button
                         onClick={handleQuery}
-                        className="bg-blue-500 text-white p-2 rounded w-full font-bold mt-2"
+                        className="bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-lg w-full font-bold mb-6 transition duration-300 ease-in-out"
                     >
                         查詢
                     </button>
                     {punches.length > 0 && (
                         <div className="w-full mt-4">
                             <div className="overflow-x-auto">
-                                <table className="min-w-full bg-white rounded-lg shadow-lg">
+                                <table className="min-w-full bg-white rounded-lg shadow-lg table-mobile">
                                     <thead>
                                         <tr className="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
                                             <th className="py-3 px-6 text-left">日期和時間</th>
@@ -80,7 +80,7 @@ export default function QueryPunch() {
                                             const isOrderIncorrect = prevPunch && prevPunch.type === punch.type;
 
                                             return (
-                                                <>
+                                                <React.Fragment key={punch.timestamp}>
                                                     {isOrderIncorrect && (
                                                         <tr className="bg-yellow-100">
                                                             <td colSpan="3" className="py-2 px-6 text-center text-yellow-700">
@@ -96,7 +96,7 @@ export default function QueryPunch() {
                                                         <td className="py-3 px-6 text-left">{punch.type}</td>
                                                         <td className="py-3 px-6 text-left">{punch.tag}</td>
                                                     </tr>
-                                                </>
+                                                </React.Fragment>
                                             );
                                         })}
                                     </tbody>

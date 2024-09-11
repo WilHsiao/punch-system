@@ -139,7 +139,7 @@ export default function AttendanceCheck() {
                           key={user.uid}
                           className="bg-white p-3 rounded-lg shadow-sm flex justify-between items-center"
                         >
-                          <span className="font-medium">{user.name}</span>
+                          <span className={`font-medium ${status === '在分部' ? 'text-green-800' : 'text-red-900'}`}>{user.name}</span>
                           <span className={`px-3 py-1 rounded-full text-sm font-medium ${
                             status === '在分部' ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800'
                           }`}>

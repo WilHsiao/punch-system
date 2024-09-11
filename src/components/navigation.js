@@ -4,6 +4,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useAuth } from '@/context/auth-context';
+import { useIamAccess } from '@/hooks/iam-access';
 
 export default function Navigation() {
   const [isMobile, setIsMobile] = useState(true);
@@ -11,6 +13,9 @@ export default function Navigation() {
   const [isPunchSystemOpen, setIsPunchSystemOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const pathname = usePathname();
+
+  const { user } = useAuth();
+  const { userRole, isLoading } = useIamAccess();
 
   const handleResize = useCallback(() => {
     setIsMobile(window.innerWidth < 768);
@@ -27,7 +32,6 @@ export default function Navigation() {
     setIsOpen(prev => !prev);
   }, []);
 
-
   const togglePunchSystem = useCallback(() => {
     setIsPunchSystemOpen(prev => !prev);
   }, []);
@@ -41,6 +45,15 @@ export default function Navigation() {
       </div>
     );
   }
+
+  const allPunchSystemLinks = [
+    { href: '/punch-system/main-punch', text: '打卡機', requiredRoles: ['打卡機'] },
+    { href: '/punch-system/punch-manual', text: '補打卡', requiredRoles: ['主管'] },
+    { href: '/punch-system/query-punch-data', text: '查詢所有打卡資料', requiredRoles: ['主管'] },
+    { href: '/punch-system/query-student-data', text: '查詢學生報到資料', requiredRoles: ['主管', '老師'] },
+    { href: '/punch-system/query-self-data', text: '我的紀錄', requiredRoles: ['主管', '老師'] },
+    { href: '/punch-system/attendance', text: '分部人員狀況', requiredRoles: ['主管', '老師'] },
+  ];
 
   const MainNavLinks = () => (
     <>
@@ -69,34 +82,42 @@ export default function Navigation() {
         <Link href="/login" legacyBehavior>
           <a className="text-xl font-bold bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-700 transition duration-300">登入／登出</a>
         </Link>
+        <Link href="/tasks" legacyBehavior>
+          <a className="text-xl font-bold bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-700 transition duration-300">分部需求表</a>
+        </Link>
       </div>
     </>
   );
 
-  const PunchSystemNavLinks = () => (
-    <div className={`${isMobile ? 'flex flex-col space-y-2 pt-4' : 'flex justify-center space-x-4 pt-4'}`}>
-      {[
-        { href: '/punch-system/punch-v2', text: '打卡機' },
-        { href: '/punch-system/punch-manual', text: '補打卡' },
-        { href: '/punch-system/query-punch-data', text: '查詢所有打卡資料' },
-        { href: '/punch-system/query-student-data', text: '查詢學生報到資料' },
-        { href: '/punch-system/query-self-data', text: '我的紀錄' },
-        { href: '/punch-system/attendance', text: '分部人員狀況' },
-      ].map(({ href, text }) => (
-        <Link key={href} href={href} legacyBehavior>
-          <a className="text-lg font-bold bg-blue-300 text-black px-3 py-1 rounded hover:bg-blue-400 transition duration-300">
-            {text}
-          </a>
-        </Link>
-      ))}
-    </div>
-  );
+  const PunchSystemNavLinks = () => {
+    if (isLoading || !userRole) {
+      return null;
+    }
+
+    const filteredLinks = allPunchSystemLinks.filter(link =>
+      userRole === '主管'
+      ? link.text !== '打卡機' // "主管"不顯示打卡機
+      : link.requiredRoles.includes(userRole)
+    );
+
+    return (
+      <div className={`${isMobile ? 'flex flex-col space-y-2 pt-4' : 'flex justify-center space-x-4 pt-4'}`}>
+        {filteredLinks.map(({ href, text }) => (
+          <Link key={href} href={href} legacyBehavior>
+            <a className="text-lg font-bold bg-blue-300 text-black px-3 py-1 rounded hover:bg-blue-400 transition duration-300">
+              {text}
+            </a>
+          </Link>
+        ))}
+      </div>
+    );
+  };
 
   return (
     <>
       {isMobile && (
         <button onClick={toggleMenu} className="fixed top-4 left-4 z-50 text-white bg-blue-500 p-2 rounded">
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <svg className="w-6 h-6 z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
           </svg>
         </button>
@@ -106,7 +127,7 @@ export default function Navigation() {
           <div className={`${isMobile ? 'flex flex-col space-y-2 mt-16' : 'flex justify-between items-center'}`}>
             <MainNavLinks />
           </div>
-          {!isMobile && isPunchSystemPage && (
+          {!isMobile && isPunchSystemPage && !isLoading && (
             <>
               {isMobile && <div className="border-t border-gray-600"></div>}
               <PunchSystemNavLinks />
