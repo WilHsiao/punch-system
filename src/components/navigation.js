@@ -6,10 +6,12 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/auth-context';
 import { useIamAccess } from '@/hooks/iam-access';
+import { FaHome, FaUserShield, FaClock, FaTasks, FaSignInAlt, FaBars, FaChevronLeft } from 'react-icons/fa'; // Import icons
 
 export default function Navigation() {
   const [isMobile, setIsMobile] = useState(true);
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false); // Controls overall navigation visibility
+  const [isCollapsed, setIsCollapsed] = useState(false); // Controls sidebar collapse
   const [isPunchSystemOpen, setIsPunchSystemOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const pathname = usePathname();
@@ -32,16 +34,27 @@ export default function Navigation() {
     setIsOpen(prev => !prev);
   }, []);
 
+  const toggleSidebar = useCallback(() => {
+    setIsCollapsed(prev => !prev);
+  }, []);
+
   const togglePunchSystem = useCallback(() => {
     setIsPunchSystemOpen(prev => !prev);
   }, []);
+
+  // Function to close the navigation on mobile after item click
+  const handleNavItemClick = useCallback(() => {
+    if (isMobile) {
+      setIsOpen(false);
+    }
+  }, [isMobile]);
 
   const isPunchSystemPage = pathname.startsWith('/punch-system');
 
   if (!isMounted) {
     return (
       <div className="h-16 bg-gray-800">
-        {/* 骨架屏 */}
+        {/* Loading skeleton */}
       </div>
     );
   }
@@ -56,37 +69,55 @@ export default function Navigation() {
   ];
 
   const MainNavLinks = () => (
-    <>
+    <div className="flex flex-col space-y-4 mt-12">
       <Link href="/" legacyBehavior>
-        <a className="text-xl font-bold bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-700 transition duration-300">首頁</a>
+        <a
+          onClick={handleNavItemClick} // Close menu on click
+          className={`flex items-center text-xl font-bold text-white px-3 py-2 rounded hover:bg-blue-700 transition duration-300 ${pathname === '/' ? 'bg-blue-600' : 'bg-gray-800'}`}
+        >
+          <FaHome className={`mr-2 ${isCollapsed ? 'text-2xl block' : 'text-xl'}`} />
+          <span className={`${isCollapsed ? 'hidden' : 'block'}`}>首頁</span>
+        </a>
       </Link>
-      <div className={`${isMobile ? 'flex flex-col space-y-2' : 'flex space-x-4 ml-auto items-center'}`}>
-        <Link href="/authorization" legacyBehavior>
-          <a className="text-xl font-bold bg-green-500 text-white px-3 py-2 rounded hover:bg-blue-700 transition duration-300">打卡機授權</a>
-        </Link>
-        <div className="relative">
-          {isMobile ? (
-            <button
-              onClick={togglePunchSystem}
-              className="w-full text-xl font-bold bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-700 transition duration-300 text-left"
-            >
-              打卡系統
-            </button>
-          ) : (
-            <Link href="/punch-system" legacyBehavior>
-              <a className="text-xl font-bold bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-700 transition duration-300">打卡系統</a>
-            </Link>
-          )}
-          {isMobile && isPunchSystemOpen && <PunchSystemNavLinks />}
-        </div>
-        <Link href="/login" legacyBehavior>
-          <a className="text-xl font-bold bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-700 transition duration-300">登入／登出</a>
-        </Link>
-        <Link href="/tasks" legacyBehavior>
-          <a className="text-xl font-bold bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-700 transition duration-300">分部需求表</a>
-        </Link>
-      </div>
-    </>
+      <Link href="/authorization" legacyBehavior>
+        <a
+          onClick={handleNavItemClick} // Close menu on click
+          className={`flex items-center text-xl font-bold text-white px-3 py-2 rounded hover:bg-blue-700 transition duration-300 ${pathname === '/authorization' ? 'bg-blue-600' : 'bg-gray-800'}`}
+        >
+          <FaUserShield className={`mr-2 ${isCollapsed ? 'text-2xl block' : 'text-xl'}`} />
+          <span className={`${isCollapsed ? 'hidden' : 'block'}`}>打卡機授權</span>
+        </a>
+      </Link>
+      <button
+        onClick={() => {
+          togglePunchSystem();
+          handleNavItemClick(); // Close menu on click
+        }}
+        className="flex items-center text-xl font-bold text-white px-3 py-2 rounded hover:bg-blue-700 transition duration-300"
+      >
+        <FaClock className={`mr-2 ${isCollapsed ? 'text-2xl block' : 'text-xl'}`} />
+        <span className={`${isCollapsed ? 'hidden' : 'block'}`}>打卡系統</span>
+      </button>
+      {isPunchSystemOpen && <PunchSystemNavLinks />}
+      <Link href="/login" legacyBehavior>
+        <a
+          onClick={handleNavItemClick} // Close menu on click
+          className={`flex items-center text-xl font-bold text-white px-3 py-2 rounded hover:bg-blue-700 transition duration-300 ${pathname === '/login' ? 'bg-blue-600' : 'bg-gray-800'}`}
+        >
+          <FaSignInAlt className={`mr-2 ${isCollapsed ? 'text-2xl block' : 'text-xl'}`} />
+          <span className={`${isCollapsed ? 'hidden' : 'block'}`}>登入／登出</span>
+        </a>
+      </Link>
+      <Link href="/tasks" legacyBehavior>
+        <a
+          onClick={handleNavItemClick} // Close menu on click
+          className={`flex items-center text-xl font-bold text-white px-3 py-2 rounded hover:bg-blue-700 transition duration-300 ${pathname === '/tasks' ? 'bg-blue-600' : 'bg-gray-800'}`}
+        >
+          <FaTasks className={`mr-2 ${isCollapsed ? 'text-2xl block' : 'text-xl'}`} />
+          <span className={`${isCollapsed ? 'hidden' : 'block'}`}>分部需求表</span>
+        </a>
+      </Link>
+    </div>
   );
 
   const PunchSystemNavLinks = () => {
@@ -96,15 +127,18 @@ export default function Navigation() {
 
     const filteredLinks = allPunchSystemLinks.filter(link =>
       userRole === '主管'
-      ? link.text !== '打卡機' // "主管"不顯示打卡機
-      : link.requiredRoles.includes(userRole)
+        ? link.text !== '打卡機'
+        : link.requiredRoles.includes(userRole)
     );
 
     return (
-      <div className={`${isMobile ? 'flex flex-col space-y-2 pt-4' : 'flex justify-center space-x-4 pt-4'}`}>
+      <div className="flex flex-col space-y-2 pt-4">
         {filteredLinks.map(({ href, text }) => (
           <Link key={href} href={href} legacyBehavior>
-            <a className="text-lg font-bold bg-blue-300 text-black px-3 py-1 rounded hover:bg-blue-400 transition duration-300">
+            <a
+              onClick={handleNavItemClick} // Close menu on click
+              className={`flex items-center text-lg font-bold bg-blue-300 text-black px-3 py-1 rounded hover:bg-blue-400 transition duration-300 ${pathname === href ? 'bg-blue-600' : ''}`}
+            >
               {text}
             </a>
           </Link>
@@ -114,27 +148,28 @@ export default function Navigation() {
   };
 
   return (
-    <>
-      {isMobile && (
+    <div className="flex">
+      {/* Sidebar Navigation */}
+      {isMobile ? (
         <button onClick={toggleMenu} className="fixed top-4 left-4 z-50 text-white bg-blue-500 p-2 rounded">
-          <svg className="w-6 h-6 z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
+          {isOpen ? <FaChevronLeft className="w-6 h-6" /> : <FaBars className="w-6 h-6" />}
+        </button>
+      ) : (
+        <button onClick={toggleSidebar} className="fixed top-4 left-4 z-50 text-white bg-gray-800 p-2 rounded">
+          {isCollapsed ? <FaBars className="w-6 h-6" /> : <FaChevronLeft className="w-6 h-6" />}
         </button>
       )}
-      <nav className={`nav-mobile ${isOpen ? 'open' : ''}`}>
-        <div className={`${isMobile ? 'px-4 py-4' : 'max-w-7xl mx-auto px-4 py-4'}`}>
-          <div className={`${isMobile ? 'flex flex-col space-y-2 mt-16' : 'flex justify-between items-center'}`}>
-            <MainNavLinks />
-          </div>
-          {!isMobile && isPunchSystemPage && !isLoading && (
-            <>
-              {isMobile && <div className="border-t border-gray-600"></div>}
-              <PunchSystemNavLinks />
-            </>
-          )}
-        </div>
+
+      <nav
+        className={`fixed left-0 top-0 h-screen bg-gray-900 p-4 flex flex-col ${isMobile ? (isOpen ? 'block' : 'hidden') : 'flex'} ${isCollapsed ? 'w-16' : 'w-64'} transition-width duration-300 shadow-lg`}
+      >
+        <MainNavLinks />
       </nav>
-    </>
+
+      {/* Main Content Area */}
+      <div className={`flex-1 p-4 ${isMobile ? 'ml-0' : `ml-${isCollapsed ? '16' : '64'}`}`}>
+        {/* Content goes here */}
+      </div>
+    </div>
   );
 }
