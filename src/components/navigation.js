@@ -132,14 +132,21 @@ export default function Navigation() {
     );
 
     return (
-      <div className="flex flex-col space-y-2 pt-4">
+      <div className={`flex flex-col space-y-2 pt-4 ${isCollapsed ? 'items-center' : ''}`}>
         {filteredLinks.map(({ href, text }) => (
           <Link key={href} href={href} legacyBehavior>
             <a
-              onClick={handleNavItemClick} // Close menu on click
-              className={`flex items-center text-lg font-bold bg-blue-300 text-black px-3 py-1 rounded hover:bg-blue-400 transition duration-300 ${pathname === href ? 'bg-blue-600' : ''}`}
+              onClick={handleNavItemClick}
+              className={`flex items-center text-lg font-bold bg-blue-300 text-black px-3 py-1 rounded hover:bg-blue-400 transition duration-300 ${
+                pathname === href ? 'bg-blue-600' : ''
+              } ${isCollapsed ? 'w-10 h-10 justify-center' : 'w-full'}`}
+              title={text}
             >
-              {text}
+              {isCollapsed ? (
+                <span className="text-s">{text.slice(0, 1)}</span>
+              ) : (
+                text
+              )}
             </a>
           </Link>
         ))}
@@ -149,22 +156,38 @@ export default function Navigation() {
 
   return (
     <div className="flex">
-      {/* Sidebar Navigation */}
-      {isMobile ? (
-        <button onClick={toggleMenu} className="fixed top-4 left-4 z-50 text-white bg-blue-500 p-2 rounded">
+      {/* Mobile Menu Button */}
+      {isMobile && (
+        <button 
+          onClick={toggleMenu} 
+          className="fixed top-4 left-4 z-50 text-white bg-blue-500 p-2 rounded"
+          aria-label={isOpen ? "Close menu" : "Open menu"}
+        >
           {isOpen ? <FaChevronLeft className="w-6 h-6" /> : <FaBars className="w-6 h-6" />}
-        </button>
-      ) : (
-        <button onClick={toggleSidebar} className="fixed top-4 left-4 z-50 text-white bg-gray-800 p-2 rounded">
-          {isCollapsed ? <FaBars className="w-6 h-6" /> : <FaChevronLeft className="w-6 h-6" />}
         </button>
       )}
 
+      {/* Navigation */}
       <nav
-        className={`fixed left-0 top-0 h-screen bg-gray-900 p-4 flex flex-col ${isMobile ? (isOpen ? 'block' : 'hidden') : 'flex'} ${isCollapsed ? 'w-16' : 'w-64'} transition-width duration-300 shadow-lg`}
+        className={`fixed left-0 top-0 h-screen bg-gray-900 p-4 flex flex-col
+          ${isMobile
+            ? isOpen ? 'w-64 p-4' : 'w-0 p-0'
+            : isCollapsed ? 'w-16' : 'w-64'
+          } transition-all duration-300 shadow-lg z-20 overflow-hidden`}
       >
-        <MainNavLinks />
+        {(!isMobile || isOpen) && <MainNavLinks />}
       </nav>
+
+      {/* Desktop Collapse Button */}
+      {!isMobile && (
+        <button 
+          onClick={toggleSidebar} 
+          className="fixed top-4 left-4 z-50 text-white bg-gray-800 p-2 rounded"
+          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          {isCollapsed ? <FaBars className="w-6 h-6" /> : <FaChevronLeft className="w-6 h-6" />}
+        </button>
+      )}
 
       {/* Main Content Area */}
       <div className={`flex-1 p-4 ${isMobile ? 'ml-0' : `ml-${isCollapsed ? '16' : '64'}`}`}>

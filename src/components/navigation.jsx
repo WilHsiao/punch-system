@@ -1,3 +1,5 @@
+// @/components/navigation.jsx
+
 import React from 'react'
 
 const navigation = () => {
