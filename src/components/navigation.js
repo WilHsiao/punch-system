@@ -169,10 +169,10 @@ export default function Navigation() {
 
       {/* Navigation */}
       <nav
-        className={`fixed left-0 top-0 h-screen bg-gray-900 p-4 flex flex-col
+        className={`fixed left-0 top-0 h-screen bg-gray-900 flex flex-col
           ${isMobile
-            ? isOpen ? 'w-64 p-4' : 'w-0 p-0'
-            : isCollapsed ? 'w-16' : 'w-64'
+            ? isOpen ? 'w-64 p-4' : 'w-0'
+            : isCollapsed ? 'w-16 p-4' : 'w-64 p-4'
           } transition-all duration-300 shadow-lg z-20 overflow-hidden`}
       >
         {(!isMobile || isOpen) && <MainNavLinks />}
