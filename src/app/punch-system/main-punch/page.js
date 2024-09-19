@@ -26,7 +26,16 @@ const sendLineNotify = async (uid, name, punchType) => {
             throw new Error('未找到 Line Notify token 數據');
         }
 
-        const message = `${name}已於${new Date().toLocaleString()}${punchType}打卡`;
+        let punchMessage;
+        if (punchType === '上班') {
+            punchMessage = '抵達分部';
+        } else if (punchType === '下班') {
+            punchMessage = '離開分部';
+        } else {
+            punchMessage = punchType;
+        }
+
+        const message = `${name}已於 ${new Date().toLocaleString()} ${punchMessage}`;
 
         for (const key of tokenKeys) {
             const token = tokenData[key].token;
