@@ -61,6 +61,7 @@ export default function Navigation() {
 
   const allPunchSystemLinks = [
     { href: '/punch-system/main-punch', text: '打卡機', requiredRoles: ['打卡機'] },
+    { href: '/punch-system/face-regist', text: '臉部註冊', requiredRoles: ['打卡機'] },
     { href: '/punch-system/punch-manual', text: '補打卡', requiredRoles: ['主管'] },
     { href: '/punch-system/query-punch-data', text: '查詢所有打卡資料', requiredRoles: ['主管'] },
     { href: '/punch-system/query-student-data', text: '查詢學生報到資料', requiredRoles: ['主管', '老師'] },
@@ -77,15 +78,6 @@ export default function Navigation() {
         >
           <FaHome className={`mr-2 ${isCollapsed ? 'text-2xl block' : 'text-xl'}`} />
           <span className={`${isCollapsed ? 'hidden' : 'block'}`}>首頁</span>
-        </a>
-      </Link>
-      <Link href="/authorization" legacyBehavior>
-        <a
-          onClick={handleNavItemClick} // Close menu on click
-          className={`flex items-center text-xl font-bold text-white px-3 py-2 rounded hover:bg-blue-700 transition duration-300 ${pathname === '/authorization' ? 'bg-blue-600' : 'bg-gray-800'}`}
-        >
-          <FaUserShield className={`mr-2 ${isCollapsed ? 'text-2xl block' : 'text-xl'}`} />
-          <span className={`${isCollapsed ? 'hidden' : 'block'}`}>打卡機授權</span>
         </a>
       </Link>
       <button
@@ -115,6 +107,15 @@ export default function Navigation() {
         >
           <FaTasks className={`mr-2 ${isCollapsed ? 'text-2xl block' : 'text-xl'}`} />
           <span className={`${isCollapsed ? 'hidden' : 'block'}`}>分部需求表</span>
+        </a>
+      </Link>
+      <Link href="/authorization" legacyBehavior>
+        <a
+          onClick={handleNavItemClick} // Close menu on click
+          className={`flex items-center text-xl font-bold text-white px-3 py-2 rounded hover:bg-blue-700 transition duration-300 ${pathname === '/authorization' ? 'bg-blue-600' : 'bg-gray-800'}`}
+        >
+          <FaUserShield className={`mr-2 ${isCollapsed ? 'text-2xl block' : 'text-xl'}`} />
+          <span className={`${isCollapsed ? 'hidden' : 'block'}`}>打卡機授權</span>
         </a>
       </Link>
     </div>

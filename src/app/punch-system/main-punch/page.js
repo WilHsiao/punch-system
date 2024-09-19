@@ -2,6 +2,8 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { database } from '@/config/firebaseConfig';
 import { set, ref, get, serverTimestamp, query, orderByChild, limitToLast } from 'firebase/database';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from '@/config/firebaseConfig';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import dynamic from 'next/dynamic';
@@ -10,7 +12,7 @@ import * as faceapi from 'face-api.js';
 
 const QrReader = dynamic(() => import('react-qr-scanner'), { ssr: false });
 
-const sendLineNotify = async (uid, name, punchType) => {
+const sendLineNotify = async (uid, name, punchType, currentUserDept) => {
     try {
         const tokenRef = ref(database, `line_tokens/${uid}`);
         const tokenSnapshot = await get(tokenRef);
@@ -28,11 +30,11 @@ const sendLineNotify = async (uid, name, punchType) => {
 
         let punchMessage;
         if (punchType === '上班') {
-            punchMessage = '抵達分部';
+            punchMessage = `抵達 <${currentUserDept}>分部`;
         } else if (punchType === '下班') {
-            punchMessage = '離開分部';
+            punchMessage = `離開 <${currentUserDept}>分部`;
         } else {
-            punchMessage = punchType;
+            punchMessage = `${punchType}${currentUserDept}分部`;
         }
 
         const message = `${name}已於 ${new Date().toLocaleString()} ${punchMessage}`;
@@ -83,6 +85,7 @@ export default function Punch() {
     const [isModelLoaded, setIsModelLoaded] = useState(false);
     const [isCameraActive, setIsCameraActive] = useState(false);
     const [isPunchSuccessful, setIsPunchSuccessful] = useState(false);
+    const [currentUser, setCurrentUser] = useState(null);
     
     const lastScanTime = useRef(Date.now());
     const isProcessing = useRef(false);
@@ -101,6 +104,36 @@ export default function Punch() {
             startVideo();
         }
     }, [isModelLoaded, isCameraActive]);
+
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                // 用戶已登錄，獲取額外的用戶信息
+                try {
+                    const userRef = ref(database, `users/${user.uid}`);
+                    const snapshot = await get(userRef);
+                    
+                    if (snapshot.exists()) {
+                        const userData = snapshot.val();
+                        setCurrentUser({ ...user, ...userData });
+                    } else {
+                        console.error('找不到用戶附加資料');
+                        toast.error('無法獲取完整的用戶資料', { autoClose: 1500 });
+                    }
+                } catch (error) {
+                    console.error('獲取用戶資料時出錯:', error);
+                    toast.error('獲取用戶資料失敗，請稍後再試', { autoClose: 1500 });
+                }
+            } else {
+                // 用戶未登錄
+                setCurrentUser(null);
+                toast.error('請先登錄', { autoClose: 3000 });
+            }
+        });
+    
+        // 清理函數
+        return () => unsubscribe();
+    }, []);
 
     const handleScan = useCallback(async (data) => {
         if (data && !isProcessing.current) {
@@ -155,7 +188,7 @@ export default function Punch() {
             await set(punchRef, punchData);
             toast.success(`${name} 打卡成功！`, { autoClose: 2000 });
 
-            await sendLineNotify(sanitizedPunchUid, name, punchType);
+            await sendLineNotify(sanitizedPunchUid, name, punchType, currentUser?.dept || '未知');
 
             setUid('');
             setName('');
