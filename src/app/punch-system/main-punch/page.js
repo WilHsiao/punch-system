@@ -1,5 +1,5 @@
 'use client';
-import { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { database } from '@/config/firebaseConfig';
 import { set, ref, get, serverTimestamp, query, orderByChild, limitToLast } from 'firebase/database';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -199,6 +199,19 @@ export default function Punch() {
             console.error("處理打卡時出錯: ", error);
             toast.error(`打卡過程出現錯誤：${error.message}`, { autoClose: 2000 });
         }
+    };
+
+    const generateQRCodeURL = () => {
+        if (!uid) {
+            toast.error('請先輸入UID', { autoClose: 2000 });
+            return;
+        }
+        const baseURL = 'https://api.qrserver.com/v1/create-qr-code/?data=';
+        const lineNotifyURL = `https://notify-bot.line.me/oauth/authorize?response_type=code&client_id=FbzIWY7We5l7BBvntokoLt&redirect_uri=https://punch-system.vercel.app/line-notify&scope=notify&state=${uid}`;
+        const fullURL = `${baseURL}${encodeURIComponent(lineNotifyURL)}&size=300x300`;
+        
+        // Open the QR code URL in a new tab
+        window.open(fullURL, '_blank');
     };
 
     const startVideo = async () => {
@@ -421,6 +434,14 @@ export default function Punch() {
                             打卡去！
                         </button>
                     </div>
+                    <div className="mb-4 flex flex-col space-y-2">
+                    <button
+                        onClick={generateQRCodeURL}
+                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-300"
+                    >
+                        產生LINE Notify QR碼
+                    </button>
+                </div>
                 </div>
                 <ToastContainer />
             </div>

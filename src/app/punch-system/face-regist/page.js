@@ -86,7 +86,7 @@ export default function FaceRegistration() {
 
     const captureAndRegister = async () => {
         if (!userName) {
-            toast.error('請輸入用戶名');
+            toast.error('請輸入 UID');
             return;
         }
 
