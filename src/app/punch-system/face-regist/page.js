@@ -9,7 +9,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { useIamAccess } from '@/hooks/iam-access';
 
 export default function FaceRegistration() {
-    const { isAuthorized, isLoading } = useIamAccess(['打卡機', '主管'], []);
+    const { isAuthorized, isLoading } = useIamAccess(['打卡機'], []);
     const [isModelLoaded, setIsModelLoaded] = useState(false);
     const [userName, setUserName] = useState('');
     const [uploadedImage, setUploadedImage] = useState(null);

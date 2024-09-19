@@ -61,7 +61,7 @@ export default function Navigation() {
 
   const allPunchSystemLinks = [
     { href: '/punch-system/main-punch', text: '打卡機', requiredRoles: ['打卡機'] },
-    { href: '/punch-system/face-regist', text: '臉部註冊', requiredRoles: ['打卡機'] },
+    { href: '/punch-system/face-regist', text: '人臉註冊', requiredRoles: ['打卡機'] },
     { href: '/punch-system/punch-manual', text: '補打卡', requiredRoles: ['主管'] },
     { href: '/punch-system/query-punch-data', text: '查詢所有打卡資料', requiredRoles: ['主管'] },
     { href: '/punch-system/query-student-data', text: '查詢學生報到資料', requiredRoles: ['主管', '老師'] },
@@ -126,11 +126,16 @@ export default function Navigation() {
       return null;
     }
 
-    const filteredLinks = allPunchSystemLinks.filter(link =>
-      userRole === '主管'
-        ? link.text !== '打卡機'
-        : link.requiredRoles.includes(userRole)
-    );
+    const filteredLinks = allPunchSystemLinks.filter(link => {
+      if (userRole === '主管') {
+        return link.text !== '打卡機' && link.text !== '人臉註冊';
+      } else if (userRole === '老師') {
+        return ['查詢學生報到資料', '我的紀錄', '分部人員狀況'].includes(link.text);
+      } else if (userRole === '打卡機') {
+        return ['打卡機', '人臉註冊'].includes(link.text);
+      }
+      return false;
+    });
 
     return (
       <div className={`flex flex-col space-y-2 pt-4 ${isCollapsed ? 'items-center' : ''}`}>
