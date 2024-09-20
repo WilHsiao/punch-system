@@ -59,3 +59,20 @@ body {
     min-width: 28rem;
   }
 }
+
+@media (max-width: 425px) {
+  .face-reg-btn {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  .face-reg-text {
+    font-size:smaller;
+  }
+}
+
+@media (max-width: 375px) {
+  .face-reg-text {
+    font-size:x-small;
+  }
+}
