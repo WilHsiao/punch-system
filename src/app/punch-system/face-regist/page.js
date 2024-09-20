@@ -44,7 +44,7 @@ export default function FaceRegistration() {
         const usersRef = dbRef(database, 'users');
         const nameQuery = query(usersRef, orderByChild('name'), equalTo(name));
         const snapshot = await get(nameQuery);
-        
+
         if (snapshot.exists()) {
             const userData = snapshot.val();
             const uid = Object.keys(userData)[0];
@@ -55,33 +55,39 @@ export default function FaceRegistration() {
     };
 
     const handleNameChange = (e) => {
-      setName(e.target.value);
-      setUid(''); // Clear UID when name changes
-  };
+        setName(e.target.value);
+        setUid('');
+    };
 
-  const handleSearch = async () => {
-      if (!name) {
-          toast.error('請輸入姓名');
-          return;
-      }
+    const handleSearch = async () => {
+        if (!name) {
+            toast.error('請輸入姓名');
+            return;
+        }
 
-      setIsSearching(true);
-      try {
-          const foundUid = await findUidByName(name);
-          if (foundUid) {
-              setUid(foundUid);
-              toast.success(`找到UID: ${foundUid}`);
-          } else {
-              setUid('');
-              toast.warn('找不到對應的UID');
-          }
-      } catch (error) {
-          console.error('Error searching for UID:', error);
-          toast.error('搜尋UID時發生錯誤');
-      } finally {
-          setIsSearching(false);
-      }
-  };
+        setIsSearching(true);
+        try {
+            const foundUid = await findUidByName(name);
+            if (foundUid) {
+                setUid(foundUid);
+                toast.success('搜尋 UID 成功！', { autoClose: 1000 });
+            } else {
+                setUid('');
+                toast.warn('找不到對應的UID', { autoClose: 1000 });
+            }
+        } catch (error) {
+            console.error('Error searching for UID:', error);
+            toast.error('搜尋UID時發生錯誤', { autoClose: 1000 });
+        } finally {
+            setIsSearching(false);
+        }
+    };
+
+    const handleKeyPress = (e) => {
+        if (e.key === 'Enter') {
+            handleSearch();
+        }
+    };
 
     const startVideo = async () => {
         try {
@@ -92,7 +98,7 @@ export default function FaceRegistration() {
             }
         } catch (error) {
             console.error('Error accessing camera:', error);
-            toast.error('無法訪問攝像頭');
+            toast.error('無法開啟鏡頭');
         }
     };
 
@@ -141,7 +147,7 @@ export default function FaceRegistration() {
         }
 
         setIsProcessing(true);
-        toast.info('正在處理，請稍候...', { autoClose: 3000 });
+        toast.info('正在處理，請稍候...', { autoClose: 2000 });
 
         let imageElement;
         if (uploadedImage) {
@@ -153,7 +159,7 @@ export default function FaceRegistration() {
         } else if (videoRef.current) {
             imageElement = videoRef.current;
         } else {
-            toast.error('請確保攝像頭已啟動或照片已上傳');
+            toast.error('請確保鏡頭已啟動或照片已上傳');
             setIsProcessing(false);
             return;
         }
@@ -193,7 +199,7 @@ export default function FaceRegistration() {
                 toast.dismiss();
                 toast.success('人臉註冊成功！');
 
-                // 如果使用攝像頭，註冊成功後關閉攝像頭
+                // 如果使用鏡頭，註冊成功後關閉
                 if (isUsingCamera) {
                     stopVideo();
                     setIsUsingCamera(false);
@@ -231,73 +237,87 @@ export default function FaceRegistration() {
     }
 
     return (
-      <div className="min-h-screen py-10 px-4 flex flex-col items-center justify-start">
-      <h1 className="text-2xl font-bold mb-4">【 人臉註冊 】</h1>
-      <div className="flex items-center mb-4">
-          <input
-              type="text"
-              value={name}
-              onChange={handleNameChange}
-              placeholder="輸入姓名"
-              className="p-3 border border-gray-300 text-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 mr-2"
-          />
-          <button
-              onClick={handleSearch}
-              disabled={isSearching || !name}
-              className={`px-4 py-3 bg-green-500 text-white rounded hover:bg-blue-600 transition-colors ${(isSearching || !name) ? 'opacity-50 cursor-not-allowed' : ''}`}
-          >
-              {isSearching ? '搜尋中...' : '搜尋'}
-          </button>
-      </div>
-      {uid && (
-          <p className="mt-2 text-sm text-gray-600 mb-4">UID: {uid}</p>
-      )}
-      <button
-          onClick={captureAndRegister}
-          disabled={isProcessing || !uid}
-          className={`m-4 px-10 py-4 bg-gradient-to-r from-purple-500 to-pink-500 font-bold text-white rounded-2xl hover:from-purple-700 hover:to-pink-700 transition-transform transform hover:scale-105 shadow-lg ${(isProcessing || !uid) ? 'opacity-50 cursor-not-allowed' : ''}`}
-      >
-          {isProcessing ? '處理中...' : '註冊'}
-      </button>
-      <div className="flex">
-          <input
-              type="file"
-              accept="image/*"
-              onChange={handleFileUpload}
-              ref={fileInputRef}
-              className="hidden"
-          />
-          <button
-              onClick={() => fileInputRef.current.click()}
-              className="m-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-          >
-              上傳照片
-          </button>
-          <button
-              onClick={handleCameraClick}
-              className="m-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-          >
-              開啟鏡頭
-          </button>
-          <button
-              onClick={stopVideo}
-              className="m-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-              disabled={!isUsingCamera}
-          >
-              關閉鏡頭
-          </button>
-      </div>
-      {showMedia && (
-          <div className="relative">
-              {uploadedImage ? (
-                  <img src={uploadedImage} alt="Uploaded" width="720" height="560" />
-              ) : (
-                  <video ref={videoRef} width="720" height="560" autoPlay muted playsInline />
-              )}
-              <canvas ref={canvasRef} className="absolute top-0 left-0" />
-          </div>
-      )}
-      <ToastContainer />
-  </div>
-);
+        <div className="min-h-screen py-10 px-4 flex flex-col items-start justify-start">
+            <div className="w-full max-w-xl mx-auto bg-white rounded-lg shadow-lg p-8">
+                <h1 className="text-2xl font-bold text-gray-700 text-center mb-4">【 人臉註冊 】</h1>
+                <div className="mb-6 w-full">
+                    <div className="flex items-center">
+                        <input
+                            id="name"
+                            type="text"
+                            value={name}
+                            onChange={handleNameChange}
+                            onKeyPress={handleKeyPress}
+                            placeholder="請輸入姓名，以搜尋UID"
+                            className="flex-grow p-3 border border-gray-300 text-gray-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        <button
+                            onClick={handleSearch}
+                            disabled={isSearching || !name}
+                            className={`ml-2 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-300 whitespace-nowrap ${(isSearching || !name) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        >
+                            {isSearching ? '搜尋中...' : '搜尋'}
+                        </button>
+                    </div>
+                </div>
+                {uid && (
+                    <div className="mb-6 text-center">
+                        <p className="w-full text-md text-green-600 font-semibold bg-green-100 px-4 py-2 rounded-lg inline-block">
+                            UID: <span className="face-reg-text font-bold text-green-800">{uid}</span>
+                        </p>
+                    </div>
+                )}
+                <div className="mb-6">
+                    <button
+                        onClick={captureAndRegister}
+                        disabled={isProcessing || !uid}
+                        className={`w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-300 ${(isProcessing || !uid) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    >
+                        {isProcessing ? '處理中...' : '註冊'}
+                    </button>
+                </div>
+                <div className="mb-6 flex justify-center space-x-4">
+                    <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileUpload}
+                        ref={fileInputRef}
+                        className="hidden"
+                    />
+                    <button
+                        onClick={() => fileInputRef.current.click()}
+                        className="face-reg-btn px-6 py-3 bg-gradient-to-r from-blue-500 to-green-500 text-white rounded-lg hover:from-blue-700 hover:to-green-700 transition-colors duration-300"
+                    >
+                        上傳照片
+                    </button>
+                    {!isUsingCamera ? (
+                        <button
+                            onClick={handleCameraClick}
+                            className="face-reg-btn px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-colors duration-300"
+                        >
+                            開啟鏡頭
+                        </button>
+                    ) : (
+                        <button
+                            onClick={stopVideo}
+                            className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-300"
+                        >
+                            關閉鏡頭
+                        </button>
+                    )}
+                </div>
+                {showMedia && (
+                    <div className="relative w-full mb-6">
+                        {uploadedImage ? (
+                            <img src={uploadedImage} alt="Uploaded" className="w-full h-auto rounded-lg" />
+                        ) : (
+                            <video ref={videoRef} className="w-full h-auto rounded-lg" autoPlay muted playsInline />
+                        )}
+                        <canvas ref={canvasRef} className="absolute top-0 left-0 w-full h-full" />
+                    </div>
+                )}
+            </div>
+            <ToastContainer />
+        </div>
+    );
 }
