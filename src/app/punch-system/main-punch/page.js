@@ -86,7 +86,10 @@ export default function Punch() {
     const [isCameraActive, setIsCameraActive] = useState(false);
     const [isPunchSuccessful, setIsPunchSuccessful] = useState(false);
     const [currentUser, setCurrentUser] = useState(null);
-    
+    const [showConfirmation, setShowConfirmation] = useState(false);
+    const [confirmationMessage, setConfirmationMessage] = useState('');
+
+
     const lastScanTime = useRef(Date.now());
     const isProcessing = useRef(false);
     const videoRef = useRef(null);
@@ -112,7 +115,7 @@ export default function Punch() {
                 try {
                     const userRef = ref(database, `users/${user.uid}`);
                     const snapshot = await get(userRef);
-                    
+
                     if (snapshot.exists()) {
                         const userData = snapshot.val();
                         setCurrentUser({ ...user, ...userData });
@@ -130,7 +133,7 @@ export default function Punch() {
                 toast.error('請先登錄', { autoClose: 3000 });
             }
         });
-    
+
         // 清理函數
         return () => unsubscribe();
     }, []);
@@ -167,12 +170,12 @@ export default function Punch() {
                 throw new Error('請確保 UID、姓名和打卡類型都已填寫');
             }
 
-            const sanitizedPunchUid = String(uid).trim();
-            if (!sanitizedPunchUid) {
+            const sanitizedUid = String(uid).trim();
+            if (!sanitizedUid) {
                 throw new Error('無效的 UID：空字符串');
             }
 
-            const punchesQuery = query(ref(database, `punches/${sanitizedPunchUid}`), orderByChild('timestamp'), limitToLast(1));
+            const punchesQuery = query(ref(database, `punches/${sanitizedUid}`), orderByChild('timestamp'), limitToLast(1));
             const punchesSnapshot = await get(punchesQuery);
             if (punchesSnapshot.exists()) {
                 const lastPunch = Object.values(punchesSnapshot.val())[0];
@@ -182,23 +185,35 @@ export default function Punch() {
                 }
             }
 
-            const punchData = { timestamp: serverTimestamp(), type: punchType };
-            const punchRef = ref(database, `punches/${uid}/${new Date().toISOString().replace(/\W/g, '')}`);
+            const currentHour = new Date().getHours();
+            if ((punchType === '下班' && currentHour < 8) || (punchType === '上班' && currentHour >= 20)) {
+                const message = punchType === '下班' ? '您正在早上8點前進行"下班"打卡，是否確定？' : '您正在晚上8點後進行"上班"打卡，是否確定？';
+                setConfirmationMessage(message);
+                setShowConfirmation(true);
+                return;
+            }
 
-            await set(punchRef, punchData);
-            toast.success(`${name} 打卡成功！`, { autoClose: 2000 });
-
-            await sendLineNotify(sanitizedPunchUid, name, punchType, currentUser?.dept || '未知');
-
-            setUid('');
-            setName('');
-            setIsPunchSuccessful(true);
-            stopVideoStream();
+            await executePunch();
 
         } catch (error) {
             console.error("處理打卡時出錯: ", error);
             toast.error(`打卡過程出現錯誤：${error.message}`, { autoClose: 2000 });
         }
+    };
+
+    const executePunch = async () => {
+        const punchData = { timestamp: serverTimestamp(), type: punchType };
+        const punchRef = ref(database, `punches/${uid}/${new Date().toISOString().replace(/\W/g, '')}`);
+
+        await set(punchRef, punchData);
+        toast.success(`${name} 打卡成功！`, { autoClose: 2000 });
+
+        await sendLineNotify(uid, name, punchType, currentUser?.dept || '未知');
+
+        setUid('');
+        setName('');
+        setIsPunchSuccessful(true);
+        stopVideoStream();
     };
 
     const generateQRCodeURL = () => {
@@ -209,7 +224,7 @@ export default function Punch() {
         const baseURL = 'https://api.qrserver.com/v1/create-qr-code/?data=';
         const lineNotifyURL = `https://notify-bot.line.me/oauth/authorize?response_type=code&client_id=FbzIWY7We5l7BBvntokoLt&redirect_uri=https://punch-system.vercel.app/line-notify&scope=notify&state=${uid}`;
         const fullURL = `${baseURL}${encodeURIComponent(lineNotifyURL)}&size=300x300`;
-        
+
         // Open the QR code URL in a new tab
         window.open(fullURL, '_blank');
     };
@@ -304,137 +319,161 @@ export default function Punch() {
 
     if (isLoading) {
         return (
-              <div className="flex min-h-screen flex-col items-center justify-between p-24">
-                    <div className="flex flex-col items-center justify-start h-1/3 w-full max-w-5xl font-mono text-sm text-center">
-                          <h1 className="text-2xl font-bold">載入中...</h1>
-                    </div>
-              </div>
+            <div className="flex min-h-screen flex-col items-center justify-between p-24">
+                <div className="flex flex-col items-center justify-start h-1/3 w-full max-w-5xl font-mono text-sm text-center">
+                    <h1 className="text-2xl font-bold">載入中...</h1>
+                </div>
+            </div>
         );
-  }
+    }
 
-  if (!isAuthorized) {
+    if (!isAuthorized) {
         return (
-              <div className="flex min-h-screen flex-col items-center justify-between p-24">
-                    <div className="flex flex-col items-center justify-start h-1/3 w-full max-w-5xl font-mono text-sm text-center">
-                          <h1 className="text-2xl font-bold">管理員須先授權！</h1>
-                    </div>
-              </div>
+            <div className="flex min-h-screen flex-col items-center justify-between p-24">
+                <div className="flex flex-col items-center justify-start h-1/3 w-full max-w-5xl font-mono text-sm text-center">
+                    <h1 className="text-2xl font-bold">管理員須先授權！</h1>
+                </div>
+            </div>
         );
-  }
+    }
 
-      return (
-            <div className="min-h-screen py-10 px-4 flex flex-col items-start justify-start">
-                <div className="w-full max-w-xl mx-auto bg-white rounded-lg shadow-lg p-8">
-                    <h1 className="text-2xl font-bold text-gray-700 text-center mb-4">【 打卡機 】</h1>
-                    <div className="mb-6 w-full flex justify-center">
-                        <div className="grid grid-cols-2 gap-4">
-                            {['上班', '下班'].map((type) => (
-                                <button
-                                    key={type}
-                                    className={`px-6 py-3 rounded-lg transition-colors duration-300 ${
-                                        punchType === type ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+    return (
+        <div className="min-h-screen py-10 px-4 flex flex-col items-start justify-start">
+            <div className="w-full max-w-xl mx-auto bg-white rounded-lg shadow-lg p-8">
+                <h1 className="text-2xl font-bold text-gray-700 text-center mb-4">【 打卡機 】</h1>
+                <div className="mb-6 w-full flex justify-center">
+                    <div className="grid grid-cols-2 gap-4">
+                        {['上班', '下班'].map((type) => (
+                            <button
+                                key={type}
+                                className={`px-6 py-3 rounded-lg transition-colors duration-300 ${punchType === type ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
                                     }`}
-                                    onClick={() => {
-                                        setPunchType(type);
-                                        localStorage.setItem('punchType', type);
+                                onClick={() => {
+                                    setPunchType(type);
+                                    localStorage.setItem('punchType', type);
+                                }}
+                            >
+                                {type}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+                <div className="flex justify-center items-center w-full mb-4">
+                    {scanning ? (
+                        <div className='w-full'>
+                            <div className="w-full h-full">
+                                <QrReader
+                                    key={Date.now()}
+                                    delay={300}
+                                    onError={(err) => {
+                                        console.error("QR Reader Error: ", err);
+                                        toast.error(`掃描 QR Code 失敗: ${err}`, { autoClose: 2000 });
                                     }}
+                                    onScan={handleScan}
+                                    style={{ width: '100%', height: '100%' }}
+                                />
+                            </div>
+                            <button
+                                onClick={() => setScanning(false)}
+                                className="w-full px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-300 mt-2"
+                            >
+                                關閉掃描器
+                            </button>
+                        </div>
+                    ) : isCameraActive ? (
+                        <div className='w-full'>
+                            <div className="relative w-full h-full">
+                                <video ref={videoRef} width="720" height="560" autoPlay muted playsInline />
+                                <canvas ref={canvasRef} style={{ position: 'absolute', top: 0, left: 0 }} />
+                            </div>
+                            <button
+                                onClick={() => {
+                                    setIsCameraActive(false);
+                                    stopVideoStream();
+                                }}
+                                className="w-full px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-300 mt-2"
+                            >
+                                關閉掃描器
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="flex flex-col space-y-4">
+                            <button
+                                onClick={() => setScanning(true)}
+                                className="px-6 py-3 bg-gradient-to-r from-blue-500 to-green-500 text-white rounded-lg hover:from-blue-700 hover:to-green-700 hover:scale-105 shadow-lg"
+                            >
+                                QRcode 掃描
+                            </button>
+                            <button
+                                onClick={() => {
+                                    if (isModelLoaded) {
+                                        setIsPunchSuccessful(false);
+                                        setIsCameraActive(true);
+                                    } else {
+                                        toast.error('模型尚未加載完成，請稍後再試');
+                                    }
+                                }}
+                                className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 hover:scale-105 shadow-lg"
+                            >
+                                人臉辨識掃描
+                            </button>
+                        </div>
+                    )}
+                </div>
+                <div className="mb-4 flex flex-col">
+                    <input
+                        type="text"
+                        id="uid"
+                        value={uid}
+                        onChange={(e) => setUid(e.target.value)}
+                        placeholder="請輸入UID"
+                        className="p-3 border border-gray-300 text-gray-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                </div>
+                <div className="mb-6 flex flex-col">
+                    <input
+                        type="text"
+                        id="name"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder="請輸入姓名"
+                        className="p-3 border border-gray-300 text-gray-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                </div>
+                <div className="mb-6">
+                    <button
+                        onClick={handlePunch}
+                        className="w-full px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-300"
+                    >
+                        打卡去！
+                    </button>
+                </div>
+                {showConfirmation && (
+                    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
+                        <div className="bg-white p-5 rounded-lg shadow-xl">
+                            <h2 className="text-xl font-bold mb-4">確認打卡</h2>
+                            <p className="mb-4">{confirmationMessage}</p>
+                            <div className="flex justify-end space-x-2">
+                                <button
+                                    onClick={() => setShowConfirmation(false)}
+                                    className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400"
                                 >
-                                    {type}
+                                    取消
                                 </button>
-                            ))}
+                                <button
+                                    onClick={() => {
+                                        setShowConfirmation(false);
+                                        executePunch();
+                                    }}
+                                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                                >
+                                    確認打卡
+                                </button>
+                            </div>
                         </div>
                     </div>
-                    <div className="flex justify-center items-center w-full mb-4">
-                        {scanning ? (
-                            <div className='w-full'>
-                                <div className="w-full h-full">
-                                    <QrReader
-                                        key={Date.now()}
-                                        delay={300}
-                                        onError={(err) => {
-                                            console.error("QR Reader Error: ", err);
-                                            toast.error(`掃描 QR Code 失敗: ${err}`, { autoClose: 2000 });
-                                        }}
-                                        onScan={handleScan}
-                                        style={{ width: '100%', height: '100%' }}
-                                    />
-                                </div>
-                                <button 
-                                    onClick={() => setScanning(false)} 
-                                    className="w-full px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-300 mt-2"
-                                >
-                                    關閉掃描器
-                                </button>
-                            </div>
-                        ) : isCameraActive ? (
-                            <div className='w-full'>
-                                <div className="relative w-full h-full">
-                                    <video ref={videoRef} width="720" height="560" autoPlay muted playsInline />
-                                    <canvas ref={canvasRef} style={{ position: 'absolute', top: 0, left: 0 }} />
-                                </div>
-                                <button 
-                                    onClick={() => {
-                                        setIsCameraActive(false);
-                                        stopVideoStream();
-                                    }} 
-                                    className="w-full px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-300 mt-2"
-                                >
-                                    關閉掃描器
-                                </button>
-                            </div>
-                        ) : (
-                            <div className="flex flex-col space-y-4">
-                                <button 
-                                    onClick={() => setScanning(true)} 
-                                    className="px-6 py-3 bg-gradient-to-r from-blue-500 to-green-500 text-white rounded-lg hover:from-blue-700 hover:to-green-700 hover:scale-105 shadow-lg"
-                                >
-                                    QRcode 掃描
-                                </button>
-                                <button 
-                                    onClick={() => {
-                                        if (isModelLoaded) {
-                                            setIsPunchSuccessful(false);
-                                            setIsCameraActive(true);
-                                        } else {
-                                            toast.error('模型尚未加載完成，請稍後再試');
-                                        }
-                                    }} 
-                                    className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 hover:scale-105 shadow-lg"
-                                >
-                                    人臉辨識掃描
-                                </button>
-                            </div>
-                        )}
-                    </div>
-                    <div className="mb-4 flex flex-col">
-                        <input
-                            type="text"
-                            id="uid"
-                            value={uid}
-                            onChange={(e) => setUid(e.target.value)}
-                            placeholder="請輸入UID"
-                            className="p-3 border border-gray-300 text-gray-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                    </div>
-                    <div className="mb-6 flex flex-col">
-                        <input
-                            type="text"
-                            id="name"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            placeholder="請輸入姓名"
-                            className="p-3 border border-gray-300 text-gray-800 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                    </div>
-                    <div className="mb-6">
-                        <button
-                            onClick={handlePunch}
-                            className="w-full px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-300"
-                        >
-                            打卡去！
-                        </button>
-                    </div>
-                    <div className="mb-4 flex flex-col space-y-2">
+                )}
+                <div className="mb-4 flex flex-col space-y-2">
                     <button
                         onClick={generateQRCodeURL}
                         className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-300"
@@ -442,8 +481,8 @@ export default function Punch() {
                         產生LINE Notify QR碼
                     </button>
                 </div>
-                </div>
-                <ToastContainer />
             </div>
-        );
-      }
+            <ToastContainer />
+        </div>
+    );
+}
