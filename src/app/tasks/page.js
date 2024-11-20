@@ -143,10 +143,10 @@ export default function ViewTasksPage() {
             <div className="min-h-screen py-10 px-4 flex flex-col items-start justify-start">
                   <div className="w-full max-w-xl mx-auto bg-white rounded-lg shadow-lg p-4 sm:p-8">
                         <div className='text-center mb-6'>
-                              <h1 className="text-2xl sm:text-3xl font-bold mb-2 text-gray-700">
+                              <h1 className="text-2xl font-bold text-gray-700 text-center mb-4">
                                     教材需求表【{userDept}】
                               </h1>
-                              <span className="text-xl sm:text-2xl font-bold text-red-500">
+                              <span className="text-xl sm:text-xl font-bold text-red-500">
                                     目前 {activeTasksCount} 項進行中任務
                               </span>
                         </div>

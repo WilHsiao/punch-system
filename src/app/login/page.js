@@ -102,74 +102,101 @@ export default function Login() {
       }
 
       return (
-            <>
-                  <div className="min-h-screen py-10 px-4 flex flex-col items-start justify-start">
-                        <div className="w-full max-w-xl mx-auto bg-white rounded-lg shadow-lg p-8">
-                        <h1 className="text-2xl font-bold text-gray-700 text-center mb-6">【 登入頁面 】</h1>
-                              {user ? (
-                                    <div className='flex flex-col items-center'>
-                                          <h1 className="text-xl font-bold mb-4 text-gray-700">{user.email} 登入成功！</h1>
-                                          {showChangePassword ? (
-                                                <form onSubmit={handleChangePassword} className="flex flex-col items-center w-full">
-                                                      <div className="mb-3 w-full flex items-center">
-                                                            <h2 className="w-1/5 text-left text-gray-700 font-bold pr-4">新密碼</h2>
-                                                            <input
-                                                                  type="password"
-                                                                  value={newPassword}
-                                                                  onChange={(e) => setNewPassword(e.target.value)}
-                                                                  placeholder="輸入新密碼"
-                                                                  className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
-                                                            />
-                                                      </div>
-                                                      <div className="mb-3 w-full flex items-center">
-                                                            <h2 className="w-1/5 text-left text-gray-700 font-bold pr-4">確認密碼</h2>
-                                                            <input
-                                                                  type="password"
-                                                                  value={confirmPassword}
-                                                                  onChange={(e) => setConfirmPassword(e.target.value)}
-                                                                  placeholder="再次輸入新密碼"
-                                                                  className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
-                                                            />
-                                                      </div>
-                                                      <button
-                                                            type="submit"
-                                                            className="mt-4 w-full px-4 py-2 bg-green-500 text-white rounded hover:bg-green-700 transition duration-300"
-                                                      >
-                                                            確認變更密碼
-                                                      </button>
-                                                      <button
-                                                            type="button"
-                                                            onClick={() => {
-                                                                  setShowChangePassword(false);
-                                                                  setNewPassword('');
-                                                                  setConfirmPassword('');
-                                                            }}
-                                                            className="mt-2 text-blue-500 hover:text-blue-700"
-                                                      >
-                                                            取消
-                                                      </button>
-                                                </form>
-                                          ) : (
-                                                <div className="flex flex-col w-full gap-4">
-                                                      <button
-                                                            onClick={handleLogout}
-                                                            className="w-full px-4 py-2 bg-red-500 text-white rounded hover:bg-red-700 transition duration-300"
-                                                      >
-                                                            登出
-                                                      </button>
-                                                      <button
-                                                            onClick={() => setShowChangePassword(true)}
-                                                            className="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700 transition duration-300"
-                                                      >
-                                                            變更密碼
-                                                      </button>
+            <div className="min-h-screen py-10 px-4 flex flex-col items-start justify-start">
+                  <div className="w-full max-w-xl mx-auto bg-white rounded-lg shadow-lg p-8">
+                        <h1 className="text-2xl font-bold text-gray-700 text-center mb-4">【 登入頁面 】</h1>
+                        {user ? (
+                              <div className='flex flex-col items-center'>
+                                    <h1 className="text-xl font-bold mb-4 text-gray-700">{user.email} 登入成功！</h1>
+                                    {showChangePassword ? (
+                                          <form onSubmit={handleChangePassword} className="flex flex-col items-center w-full">
+                                                <div className="mb-3 w-full flex items-center">
+                                                      <h2 className="w-1/5 text-left text-gray-700 font-bold pr-4">新密碼</h2>
+                                                      <input
+                                                            type="password"
+                                                            value={newPassword}
+                                                            onChange={(e) => setNewPassword(e.target.value)}
+                                                            placeholder="輸入新密碼"
+                                                            className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
+                                                      />
                                                 </div>
-                                          )}
-                                    </div>
-                              ) : (
-                                    <>
-                                          {showForgotPassword ? (
-                                                <form onSubmit={handleForgotPassword} className="flex flex-col items-center w-full">
+                                                <div className="mb-3 w-full flex items-center">
+                                                      <h2 className="w-1/5 text-left text-gray-700 font-bold pr-4">確認密碼</h2>
+                                                      <input
+                                                            type="password"
+                                                            value={confirmPassword}
+                                                            onChange={(e) => setConfirmPassword(e.target.value)}
+                                                            placeholder="再次輸入新密碼"
+                                                            className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
+                                                      />
+                                                </div>
+                                                <button
+                                                      type="submit"
+                                                      className="mt-4 w-full px-4 py-2 bg-green-500 text-white rounded hover:bg-green-700 transition duration-300"
+                                                >
+                                                      確認變更密碼
+                                                </button>
+                                                <button
+                                                      type="button"
+                                                      onClick={() => {
+                                                            setShowChangePassword(false);
+                                                            setNewPassword('');
+                                                            setConfirmPassword('');
+                                                      }}
+                                                      className="mt-2 text-blue-500 hover:text-blue-700"
+                                                >
+                                                      取消
+                                                </button>
+                                          </form>
+                                    ) : (
+                                          <div className="flex flex-col w-full gap-4">
+                                                <button
+                                                      onClick={handleLogout}
+                                                      className="w-full px-4 py-2 bg-red-500 text-white rounded hover:bg-red-700 transition duration-300"
+                                                >
+                                                      登出
+                                                </button>
+                                                <button
+                                                      onClick={() => setShowChangePassword(true)}
+                                                      className="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700 transition duration-300"
+                                                >
+                                                      變更密碼
+                                                </button>
+                                          </div>
+                                    )}
+                              </div>
+                        ) : (
+                              <>
+                                    {showForgotPassword ? (
+                                          <form onSubmit={handleForgotPassword} className="flex flex-col items-center w-full">
+                                                <div className="mb-3 w-full flex items-center">
+                                                      <h2 className="w-1/5 text-left text-gray-700 font-bold pr-4">信箱</h2>
+                                                      <input
+                                                            type="email"
+                                                            value={email}
+                                                            onChange={(e) => setEmail(e.target.value)}
+                                                            placeholder="請輸入信箱"
+                                                            className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
+                                                            autoComplete="email"
+                                                      />
+                                                </div>
+                                                <button
+                                                      type="submit"
+                                                      className="mt-4 w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700 transition duration-300"
+                                                >
+                                                      發送重置密碼郵件
+                                                </button>
+                                                <button
+                                                      type="button"
+                                                      onClick={() => setShowForgotPassword(false)}
+                                                      className="mt-2 text-blue-500 hover:text-blue-700"
+                                                >
+                                                      返回登入
+                                                </button>
+                                          </form>
+                                    ) : (
+                                          <>
+                                                <form onSubmit={handleLogin} className="flex flex-col items-center w-full">
                                                       <div className="mb-3 w-full flex items-center">
                                                             <h2 className="w-1/5 text-left text-gray-700 font-bold pr-4">信箱</h2>
                                                             <input
@@ -181,67 +208,38 @@ export default function Login() {
                                                                   autoComplete="email"
                                                             />
                                                       </div>
+                                                      <div className="mb-3 w-full flex items-center">
+                                                            <h2 className="w-1/5 text-left text-gray-700 font-bold pr-4">密碼</h2>
+                                                            <input
+                                                                  type="password"
+                                                                  value={password}
+                                                                  onChange={(e) => setPassword(e.target.value)}
+                                                                  placeholder="請輸入密碼"
+                                                                  className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
+                                                                  autoComplete="current-password"
+                                                            />
+                                                      </div>
                                                       <button
                                                             type="submit"
                                                             className="mt-4 w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700 transition duration-300"
                                                       >
-                                                            發送重置密碼郵件
-                                                      </button>
-                                                      <button
-                                                            type="button"
-                                                            onClick={() => setShowForgotPassword(false)}
-                                                            className="mt-2 text-blue-500 hover:text-blue-700"
-                                                      >
-                                                            返回登入
+                                                            登入
                                                       </button>
                                                 </form>
-                                          ) : (
-                                                <>
-                                                      <form onSubmit={handleLogin} className="flex flex-col items-center w-full">
-                                                            <div className="mb-3 w-full flex items-center">
-                                                                  <h2 className="w-1/5 text-left text-gray-700 font-bold pr-4">信箱</h2>
-                                                                  <input
-                                                                        type="email"
-                                                                        value={email}
-                                                                        onChange={(e) => setEmail(e.target.value)}
-                                                                        placeholder="請輸入信箱"
-                                                                        className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
-                                                                        autoComplete="email"
-                                                                  />
-                                                            </div>
-                                                            <div className="mb-3 w-full flex items-center">
-                                                                  <h2 className="w-1/5 text-left text-gray-700 font-bold pr-4">密碼</h2>
-                                                                  <input
-                                                                        type="password"
-                                                                        value={password}
-                                                                        onChange={(e) => setPassword(e.target.value)}
-                                                                        placeholder="請輸入密碼"
-                                                                        className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
-                                                                        autoComplete="current-password"
-                                                                  />
-                                                            </div>
-                                                            <button
-                                                                  type="submit"
-                                                                  className="mt-4 w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700 transition duration-300"
-                                                            >
-                                                                  登入
-                                                            </button>
-                                                      </form>
-                                                      <button
-                                                            type="button"
-                                                            onClick={() => setShowForgotPassword(true)}
-                                                            className="mt-2 text-blue-500 hover:text-blue-700"
-                                                      >
-                                                            忘記密碼？
-                                                      </button>
-                                                </>
-                                          )}
-                                    </>
-                              )}
-                              {error && <p className="text-red-500 mt-2">{error}</p>}
-                              <ToastContainer />
-                        </div>
+                                                <button
+                                                      type="button"
+                                                      onClick={() => setShowForgotPassword(true)}
+                                                      className="mt-2 text-blue-500 hover:text-blue-700"
+                                                >
+                                                      忘記密碼？
+                                                </button>
+                                          </>
+                                    )}
+                              </>
+                        )}
+                        {error && <p className="text-red-500 mt-2">{error}</p>}
+                        <ToastContainer />
                   </div>
-            </>
+            </div>
       );
 }

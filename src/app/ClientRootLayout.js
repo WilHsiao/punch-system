@@ -13,7 +13,7 @@ export default function ClientRootLayout({ children }) {
         {children}
       </AuthProvider>
       <footer className="w-full flex items-center justify-center py-4 bg-gray-800 text-white text-sm">
-        © 2024 Yu
+        © 2024 YU
       </footer>
     </>
   );

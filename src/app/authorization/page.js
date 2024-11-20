@@ -76,7 +76,7 @@ export default function Auth() {
     <>
       <div className="min-h-screen py-10 px-4 flex flex-col items-start justify-start">
         <div className="w-full max-w-xl mx-auto bg-white rounded-lg shadow-lg p-8">
-          <h1 className="text-2xl font-bold text-gray-700 text-center mb-6">【 授權 】</h1>
+          <h1 className="text-2xl font-bold text-gray-700 text-center mb-4">【 打卡系統授權 】</h1>
           {user && authorized ? (
             <div className='flex justify-center'>
               <h1 className="text-xl font-bold mb-4 text-gray-700">{user.email} 已授權！</h1>

@@ -102,9 +102,9 @@ export default function PunchManual() {
 
   return (
     <>
-      <div className="min-h-screen py-10 px-4 flex flex-col items-center justify-start">
+      <div className="min-h-screen py-2 px-4 flex flex-col items-center justify-start">
         <div className="w-full max-w-xl mx-auto bg-white rounded-lg shadow-lg p-8">
-          <h1 className="text-2xl font-bold text-gray-700 text-center pb-3">【 補打卡 】</h1>
+          <h1 className="text-2xl font-bold text-gray-700 text-center mb-4">【 補打卡 】</h1>
           <div className="divide-y divide-gray-200">
             <div className="py-8 text-base leading-6 space-y-4 text-gray-700 sm:text-lg sm:leading-7">
               <div className="relative">

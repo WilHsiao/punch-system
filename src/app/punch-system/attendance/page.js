@@ -113,9 +113,9 @@ export default function AttendanceCheck() {
 
   return (
     <>
-      <div className="min-h-screen py-10 px-4 flex flex-col items-start justify-start">
+      <div className="min-h-screen py-2 px-4 flex flex-col items-start justify-start">
         <div className="w-full max-w-xl mx-auto bg-white rounded-lg shadow-lg p-8">
-          <h1 className="text-2xl font-bold text-gray-800 text-center mb-6">【 分部人員狀況 】</h1>
+          <h1 className="text-2xl font-bold text-gray-700 text-center mb-4">【 分部人員狀況 】</h1>
           <button
             onClick={checkAttendance}
             className="bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-lg w-full font-bold mb-6 transition duration-300 ease-in-out"
