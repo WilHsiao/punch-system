@@ -20,7 +20,11 @@ export default function Navigation() {
   const { userRole, isLoading } = useIamAccess();
 
   const handleResize = useCallback(() => {
-    setIsMobile(window.innerWidth < 768);
+    const newIsMobile = window.innerWidth < 768;
+    setIsMobile(newIsMobile);
+    if (newIsMobile) {
+      setIsCollapsed(false);  // 切換到手機版時重置collapsed狀態
+    }
   }, []);
 
   useEffect(() => {
@@ -143,9 +147,8 @@ export default function Navigation() {
           <Link key={href} href={href} legacyBehavior>
             <a
               onClick={handleNavItemClick}
-              className={`flex items-center text-lg font-bold bg-blue-300 text-black px-3 py-1 rounded hover:bg-blue-400 transition duration-300 ${
-                pathname === href ? 'bg-blue-600' : ''
-              } ${isCollapsed ? 'w-10 h-10 justify-center' : 'w-full'}`}
+              className={`flex items-center text-lg font-bold bg-blue-300 text-black px-3 py-1 rounded hover:bg-blue-400 transition duration-300 ${pathname === href ? 'bg-blue-600' : ''
+                } ${isCollapsed ? 'w-10 h-10 justify-center' : 'w-full'}`}
               title={text}
             >
               {isCollapsed ? (
@@ -163,9 +166,15 @@ export default function Navigation() {
   return (
     <div className="flex">
       {/* Mobile Menu Button */}
+
+      {/* Overlay - Always present but opacity controlled by isOpen */}
+      <div
+        className={`fixed inset-0 bg-black transition-transform duration-300 md:hidden ${isOpen ? 'opacity-50 pointer-events-auto' : 'opacity-0 pointer-events-none'
+          }`}
+      />
       {isMobile && (
-        <button 
-          onClick={toggleMenu} 
+        <button
+          onClick={toggleMenu}
           className="fixed top-4 left-4 z-50 text-white bg-blue-500 p-2 rounded"
           aria-label={isOpen ? "Close menu" : "Open menu"}
         >
@@ -186,8 +195,8 @@ export default function Navigation() {
 
       {/* Desktop Collapse Button */}
       {!isMobile && (
-        <button 
-          onClick={toggleSidebar} 
+        <button
+          onClick={toggleSidebar}
           className="fixed top-4 left-4 z-50 text-white bg-gray-800 p-2 rounded"
           aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
