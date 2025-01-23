@@ -179,7 +179,7 @@ export default function Navigation() {
           ${isMobile
             ? isOpen ? 'w-64 p-4' : 'w-0'
             : isCollapsed ? 'w-16 p-4' : 'w-64 p-4'
-          } transition-all duration-300 shadow-lg z-20 overflow-hidden`}
+          } transition-transform duration-300 shadow-lg z-20 overflow-hidden`}
       >
         {(!isMobile || isOpen) && <MainNavLinks />}
       </nav>
