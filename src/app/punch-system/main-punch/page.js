@@ -12,51 +12,83 @@ import * as faceapi from 'face-api.js';
 
 const QrReader = dynamic(() => import('react-qr-scanner'), { ssr: false });
 
-const sendLineNotify = async (uid, name, punchType, currentUserDept) => {
+const sendEmailNotification = async (uid, name, punchType, currentUserDept) => {
     try {
-        const tokenRef = ref(database, `line_tokens/${uid}`);
-        const tokenSnapshot = await get(tokenRef);
+        console.log('==== 開始發送郵件通知 ====');
+        console.log('參數:', { uid, name, punchType, currentUserDept });
 
-        if (!tokenSnapshot.exists()) {
-            throw new Error('找不到該用戶的 Line token');
-        }
-
-        const tokenData = tokenSnapshot.val();
-        const tokenKeys = Object.keys(tokenData);
-
-        if (tokenKeys.length === 0) {
-            throw new Error('未找到 Line Notify token 數據');
-        }
-
-        let punchMessage;
-        if (punchType === '上班') {
-            punchMessage = `抵達 <${currentUserDept}>分部`;
-        } else if (punchType === '下班') {
-            punchMessage = `離開 <${currentUserDept}>分部`;
-        } else {
-            punchMessage = `${punchType}${currentUserDept}分部`;
-        }
-
-        const message = `${name}已於 ${new Date().toLocaleString()} ${punchMessage}`;
-
-        for (const key of tokenKeys) {
-            const token = tokenData[key].token;
-            if (!token) continue;
-
-            const response = await fetch('/api/send-line-notify', {
+        // 1. 嘗試獲取用戶資料
+        const userRef = ref(database, `users/${uid}`);
+        console.log('獲取用戶資料，路徑:', `users/${uid}`);
+        
+        try {
+            const userSnapshot = await get(userRef);
+            console.log('用戶快照獲取結果:', userSnapshot.exists() ? '存在' : '不存在');
+            
+            if (!userSnapshot.exists()) {
+                throw new Error('找不到該用戶資料');
+            }
+            
+            const userData = userSnapshot.val();
+            console.log('用戶資料:', JSON.stringify(userData, null, 2));
+            
+            const userEmail = userData.email;
+            console.log('用戶郵件:', userEmail);
+            
+            if (!userEmail) {
+                throw new Error('找不到用戶電子郵件地址');
+            }
+            
+            // 2. 準備郵件內容
+            let punchMessage;
+            if (punchType === '上班') {
+                punchMessage = `抵達 <${currentUserDept}>分部`;
+            } else if (punchType === '下班') {
+                punchMessage = `離開 <${currentUserDept}>分部`;
+            } else {
+                punchMessage = `${punchType}${currentUserDept}分部`;
+            }
+            
+            const subject = `打卡通知: ${name} ${punchType}`;
+            const text = `${name}已於 ${new Date().toLocaleString()} ${punchMessage}`;
+            console.log('準備發送郵件:', { to: userEmail, subject, text });
+            
+            toast.success(`郵件將發送到: ${userEmail}`, { autoClose: 1500 });
+            
+        
+            // 3. 發送郵件
+            console.log('開始調用郵件 API');
+            const response = await fetch('/api/send-email-notify', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message, token })
+                body: JSON.stringify({
+                    to: userEmail,
+                    subject: subject,
+                    text: text
+                })
             });
-
+            
+            console.log('API 回應狀態:', response.status);
+            
+            // 4. 處理回應
+            const responseText = await response.text();
+            console.log('API 回應內容:', responseText);
+            
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || '發送 Line Notify 失敗');
+                throw new Error(`API 回應錯誤 (${response.status}): ${responseText}`);
             }
+            
+            console.log('==== 郵件發送成功 ====');
+            
+            
+        } catch (userError) {
+            console.error('獲取用戶資料出錯:', userError);
+            throw userError;
         }
     } catch (error) {
-        console.error('發送 Line Notify 時出錯:', error);
-        toast.error(`Line 通知發送失敗: ${error.message}`);
+        console.error('==== 發送郵件通知時出錯 ====', error);
+        console.error('錯誤堆疊:', error.stack);
+        toast.error(`郵件通知發送失敗: ${error.message}`, { autoClose: 3000 });
     }
 };
 
@@ -88,7 +120,6 @@ export default function Punch() {
     const [currentUser, setCurrentUser] = useState(null);
     const [showConfirmation, setShowConfirmation] = useState(false);
     const [confirmationMessage, setConfirmationMessage] = useState('');
-
 
     const lastScanTime = useRef(Date.now());
     const isProcessing = useRef(false);
@@ -208,7 +239,8 @@ export default function Punch() {
         await set(punchRef, punchData);
         toast.success(`${name} 打卡成功！`, { autoClose: 2000 });
 
-        await sendLineNotify(uid, name, punchType, currentUser?.dept || '未知');
+        // 這裡替換為發送郵件通知
+        await sendEmailNotification(uid, name, punchType, currentUser?.dept || '未知');
 
         setUid('');
         setName('');
@@ -216,17 +248,40 @@ export default function Punch() {
         stopVideoStream();
     };
 
-    const generateQRCodeURL = () => {
+    // 移除原先的generateQRCodeURL函數，新增設置電子郵件函數
+    const setupEmailNotification = async () => {
         if (!uid) {
             toast.error('請先輸入UID', { autoClose: 2000 });
             return;
         }
-        const baseURL = 'https://api.qrserver.com/v1/create-qr-code/?data=';
-        const lineNotifyURL = `https://notify-bot.line.me/oauth/authorize?response_type=code&client_id=FbzIWY7We5l7BBvntokoLt&redirect_uri=https://punch-system.vercel.app/line-notify&scope=notify&state=${uid}`;
-        const fullURL = `${baseURL}${encodeURIComponent(lineNotifyURL)}&size=300x300`;
-
-        // Open the QR code URL in a new tab
-        window.open(fullURL, '_blank');
+        
+        try {
+            const userRef = ref(database, `users/${uid}`);
+            const userSnapshot = await get(userRef);
+            
+            if (!userSnapshot.exists()) {
+                toast.error('用戶不存在！', { autoClose: 2000 });
+                return;
+            }
+            
+            // 這裡可以加入彈出視窗讓用戶輸入或確認電子郵件
+            const userData = userSnapshot.val();
+            const currentEmail = userData.email || '';
+            
+            // 使用簡單提示輸入
+            const newEmail = prompt('請輸入接收打卡通知的電子郵件地址:', currentEmail);
+            
+            if (newEmail && newEmail.includes('@')) {
+                // 更新用戶的電子郵件
+                await set(ref(database, `users/${uid}/email`), newEmail);
+                toast.success('郵件通知設置成功！', { autoClose: 2000 });
+            } else if (newEmail !== null) {
+                toast.error('請輸入有效的電子郵件地址', { autoClose: 2000 });
+            }
+        } catch (error) {
+            console.error('設置郵件通知時出錯:', error);
+            toast.error(`設置郵件通知失敗: ${error.message}`, { autoClose: 2000 });
+        }
     };
 
     const startVideo = async () => {
@@ -475,10 +530,10 @@ export default function Punch() {
                 )}
                 <div className="mb-4 flex flex-col space-y-2">
                     <button
-                        onClick={generateQRCodeURL}
+                        onClick={setupEmailNotification}
                         className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-300"
                     >
-                        產生LINE Notify QR碼
+                        設置郵件通知
                     </button>
                 </div>
             </div>
