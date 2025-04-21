@@ -49,7 +49,7 @@ const sendEmailNotification = async (uid, name, punchType, currentUserDept) => {
                 punchMessage = `${punchType}${currentUserDept}分部`;
             }
             
-            // 在這裡修改email內容！
+            // 在這裡修改email內容！!!
             const subject = `打卡通知: ${name} ${punchType}`;
             const text = `${name}已於 ${new Date().toLocaleString()} ${punchMessage}`;
             console.log('準備發送郵件:', { to: userEmail, subject, text });
