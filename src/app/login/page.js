@@ -131,7 +131,7 @@ export default function Login() {
                         await verifyBeforeUpdateEmail(user, newEmail);
                         console.log('驗證郵件已發送到新的電子郵件地址！');
                         
-                        toast.success('驗證郵件已發送到新的電子郵件地址，請前往查收並點擊驗證鏈接完成變更！', { autoClose: 3000 });
+                        toast.success('驗證郵件已發送到新的電子郵件地址，請前往查收並點擊驗證鏈接完成變更！', { autoClose: 1000 });
                         setNewEmail('');
                         setCurrentPassword('');
                         setShowChangeEmail(false);
