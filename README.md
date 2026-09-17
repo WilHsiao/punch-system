@@ -46,8 +46,6 @@ flowchart LR
 | 手動補登 | `/punch-system/punch-manual` | 由主管新增例外打卡紀錄 |
 | 出勤與查詢 | `/punch-system/attendance` 等 | 依角色查看個人、學生或整體出勤資料 |
 
-> 作品集發布時，建議將去識別化畫面放在 `docs/screenshots/`，並於本節加入打卡、人臉註冊及出勤查詢截圖。截圖不得包含姓名、Email、UID、臉部影像或真實出勤紀錄。
-
 ## 開始使用
 
 ### 環境需求
@@ -61,7 +59,7 @@ flowchart LR
 1. 複製專案並安裝鎖定版本的套件：
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/WilHsiao/punch-system.git
 cd punch-system
 npm ci
 ```
@@ -148,7 +146,3 @@ public/
 ## 安全性注意事項
 
 Firebase 規則、管理員憑證、OAuth 密鑰與郵件密碼皆應由環境變數或部署平台的 Secret 管理。正式部署前，請檢查 `src/app/api/` 與 `src/config/`，移除硬編碼的敏感資料並輪替任何曾提交到版本庫的密鑰。
-
-## 貢獻方式
-
-開發與提交規範請參閱 [AGENTS.md](./AGENTS.md)。Pull Request 應說明變更內容、驗證方式及相關議題；介面調整請附上截圖。
