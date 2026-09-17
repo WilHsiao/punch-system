@@ -10,6 +10,7 @@ node_modules/
 # 日誌文件
 npm-debug.log*
 yarn-debug.log*
+firebase-debug.log*
 
 # .env環境變量文件
 .env
